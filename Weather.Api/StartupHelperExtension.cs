@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Weather.Application;
+using Weather.Application.DTOs;
 using Weather.Infrastructure;
 
 namespace Weather.Api;
@@ -37,7 +38,11 @@ public static class StartupHelperExtension
             ));
 
         builder.Services.AddScoped<IOpenMeteoClient, OpenMeteoClient>();
-        builder.Services.AddScoped<IUvIndexProcessor, UvIndexProcessor>();
+
+        builder.Services.AddScoped<IAirQualityProcessor, AirQualityProcessor>();
+        builder.Services.AddScoped<IFeelsLikeProcessor, FeelsLikeProcessor>();
+        builder.Services.AddScoped<IUvProcessor, UvProcessor>();
+        
         builder.Services.AddScoped<IWeatherService, WeatherService>();
         
         return builder.Build();

@@ -3,6 +3,7 @@ using System.Text;
 using Weather.Application;
 using Weather.Application.OpenMeteoDTOs;
 using System.Text.Json;
+using Weather.Application.OpenMeteoDTOs.Daily;
 
 namespace Weather.Infrastructure;
 

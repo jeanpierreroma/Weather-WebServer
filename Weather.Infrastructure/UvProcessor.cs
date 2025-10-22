@@ -1,13 +1,14 @@
 using Weather.Application;
 using Weather.Application.DTOs;
 using Weather.Application.OpenMeteoDTOs;
+using Weather.Application.OpenMeteoDTOs.Daily;
 using Weather.Domain.ValueObjects;
 
 namespace Weather.Infrastructure;
 
-public class UvIndexProcessor: IUvIndexProcessor
+public class UvProcessor: IUvProcessor
 {
-    public UvIndexDetails Process(OpenMeteoDailyForecastResponse raw)
+    public UvDetails Process(OpenMeteoDailyForecastResponse raw)
     {
         if (raw?.Daily?.UvIndexMax == null || raw.Daily.UvIndexMax.Count == 0)
             throw new ArgumentException("uv_index_max is missing in Open-Meteo response.");
@@ -25,7 +26,7 @@ public class UvIndexProcessor: IUvIndexProcessor
         var riskName = RiskToString(risk);
         var summary = BuildSummary(risk);
 
-        return new UvIndexDetails
+        return new UvDetails
         {
             UvIndexValueMax = value,
             UvIndexRiskCategoryName = riskName,

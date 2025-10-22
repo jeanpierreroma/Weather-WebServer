@@ -2,17 +2,14 @@ namespace Weather.Application.DTOs;
 
 public class DailyForecast
 {
-    public UvIndexDetails UvIndexDetails { get; init; }
+    public AirQualityDetails AirQualityDetails { get; set; } = null!;
+    public FeelsLikeDetails FeelsLikeDetails { get; set; } = null!;
+    public HumidityDetails HumidityDetails { get; set; } = null!;
+    public PrecipitationDetails PrecipitationDetails { get; set; } = null!;
+    public PressureDetails PressureDetails { get; set; } = null!;
+    public SunDetails SunDetails { get; set; } = null!;
+    public UvDetails UvDetails { get; init; } = null!;
+    public VisibilityDetails VisibilityDetails { get; set; } = null!;
 
-    public string Sunrise { get; init; } = string.Empty;
-
-    public string Sunset { get; init; } = string.Empty;
-
-    public string PrecipitationSum { get; init; } = string.Empty;
-
-    public string WindSpeed10mMax { get; init; } = string.Empty;
-
-    public string WindGusts10mMax { get; init; } = string.Empty;
-
-    public string WindDirection10mDominant { get; init; } = string.Empty;
+    public WindDetails WindDetails { get; init; } = null!;
 }

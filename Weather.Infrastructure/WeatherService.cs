@@ -1,6 +1,7 @@
 using Weather.Application;
 using Weather.Application.DTOs;
 using Weather.Application.OpenMeteoDTOs;
+using Weather.Application.OpenMeteoDTOs.Daily;
 
 namespace Weather.Infrastructure;
 
@@ -16,18 +17,30 @@ public class WeatherService: IWeatherService
     ];
     
     private readonly IOpenMeteoClient _client;
-    private readonly IUvIndexProcessor _uvProcessor;
+
+    private readonly IAirQualityProcessor _airQualityProcessor;
+    private readonly IFeelsLikeProcessor _feelsLikeProcessor;
+    private readonly IHumidityProcessor _humidityProcessor;
+    private readonly IPrecipitationProcessor _precipitationProcessor;
+    private readonly IPressureProcessor _pressureProcessor;
+    private readonly IUvProcessor _uvProcessor;
+    private readonly IVisibilityProcessor _visibilityProcessor;
     
-    public WeatherService(IOpenMeteoClient client, IUvIndexProcessor uvProcessor)
+    public WeatherService(IOpenMeteoClient client, IUvProcessor uvProcessor, IAirQualityProcessor airQualityProcessor, IFeelsLikeProcessor feelsLikeProcessor, IHumidityProcessor humidityProcessor, IPrecipitationProcessor precipitationProcessor, IPressureProcessor pressureProcessor, IVisibilityProcessor visibilityProcessor)
     {
         _client = client;
+        
+        _airQualityProcessor = airQualityProcessor;
+        _feelsLikeProcessor = feelsLikeProcessor;
+        _humidityProcessor = humidityProcessor;
+        _precipitationProcessor = precipitationProcessor;
+        _pressureProcessor = pressureProcessor;
         _uvProcessor = uvProcessor;
+        _visibilityProcessor = visibilityProcessor;
     }    
     
     public async Task<DailyForecast?> GetDailyForecastAsync(OpenMeteoDailyForecastRequest request, CancellationToken ct)
     {
-    // 1) Гарантуємо, що витягнемо і UV, і решту «сирих» полів
-    // Ensure we request UV and the other raw daily fields from the API
         var daily = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (request.Daily is { Count: > 0 })
             foreach (var d in request.Daily) daily.Add(d);
@@ -42,30 +55,38 @@ public class WeatherService: IWeatherService
             Timezone = string.IsNullOrWhiteSpace(request.Timezone) ? "auto" : request.Timezone,
             Daily = daily.ToArray()
         };
-
-    // 2) Отримуємо сирий респонс від Open-Meteo
-    // Get the raw response from the Open-Meteo API
+        
         var raw = await _client.GetDailyForecast(req, ct);
         if (raw is null) return null;
-
-    // 3) Обробляємо UV через окремий обробник
-    // Process UV index data using the UV processor
+        
+        var airQualitySection = _airQualityProcessor.Process(raw);
+        var feelsLikeSection = _feelsLikeProcessor.Process(raw);
+        var humiditySection = _humidityProcessor.Process(raw);
+        var precipitationSection = _precipitationProcessor.Process(raw);
+        var pressureSection = _pressureProcessor.Process(raw);
         var uvSection = _uvProcessor.Process(raw);
-
-    // 4) Збираємо агреговану DTO
-    // Assemble the aggregated DTO to return to callers
+        var visibilitySection = _visibilityProcessor.Process(raw);
+        
         return new DailyForecast
         {
-            Sunrise = raw.Daily.Sunrise.FirstOrDefault() ?? string.Empty,
-            Sunset = raw.Daily.Sunset.FirstOrDefault() ?? string.Empty,
-            
-            PrecipitationSum = Convert.ToString(raw.Daily.PrecipitationSum?.FirstOrDefault()) ?? string.Empty,
-
-            UvIndexDetails = uvSection,
-
-            WindSpeed10mMax = Convert.ToString(raw.Daily.WindSpeed10mMax?.FirstOrDefault()) ?? string.Empty,
-            WindGusts10mMax = Convert.ToString(raw.Daily.WindGusts10mMax?.FirstOrDefault()) ?? string.Empty,
-            WindDirection10mDominant = Convert.ToString(raw.Daily.WindDirection10mDominant?.FirstOrDefault()) ?? string.Empty,
+            AirQualityDetails = airQualitySection,
+            FeelsLikeDetails = feelsLikeSection,
+            HumidityDetails = humiditySection,
+            PrecipitationDetails = precipitationSection,
+            PressureDetails = pressureSection,
+            SunDetails = new SunDetails
+            {
+                SunriseText = raw.Daily.Sunrise.FirstOrDefault() ?? string.Empty,
+                SunsetText = raw.Daily.Sunset.FirstOrDefault() ?? string.Empty,
+            },
+            UvDetails = uvSection,
+            VisibilityDetails = visibilitySection,
+            WindDetails = new WindDetails
+            {
+                WindSpeedMps = raw.Daily.WindSpeed10mMax?.FirstOrDefault() ?? 0,
+                GustSpeedMps = raw.Daily.WindGusts10mMax?.FirstOrDefault() ?? 0,
+                DirectionDegrees = raw.Daily.WindDirection10mDominant?.FirstOrDefault() ?? 0
+            }
         };
     }
 }

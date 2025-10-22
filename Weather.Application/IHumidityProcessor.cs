@@ -4,7 +4,7 @@ using Weather.Application.OpenMeteoDTOs.Daily;
 
 namespace Weather.Application;
 
-public interface IWeatherService
+public interface IHumidityProcessor
 {
-    Task<DailyForecast?> GetDailyForecastAsync(OpenMeteoDailyForecastRequest request, CancellationToken ct);
+    HumidityDetails Process(OpenMeteoDailyForecastResponse raw);
 }

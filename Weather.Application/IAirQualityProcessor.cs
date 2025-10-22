@@ -4,7 +4,7 @@ using Weather.Application.OpenMeteoDTOs.Daily;
 
 namespace Weather.Application;
 
-public interface IWeatherService
+public interface IAirQualityProcessor
 {
-    Task<DailyForecast?> GetDailyForecastAsync(OpenMeteoDailyForecastRequest request, CancellationToken ct);
+    AirQualityDetails Process(OpenMeteoDailyForecastResponse raw);
 }

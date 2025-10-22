@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Application.OpenMeteoDTOs;
+namespace Weather.Application.OpenMeteoDTOs.Daily;
 
 public sealed class OpenMeteoDailyForecastResponse
 {

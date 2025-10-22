@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Weather.Application;
 using Weather.Application.OpenMeteoDTOs;
+using Weather.Application.OpenMeteoDTOs.Daily;
 
 namespace Weather.Api.Controllers;
 

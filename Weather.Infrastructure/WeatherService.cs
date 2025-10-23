@@ -1,6 +1,5 @@
 using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs;
 using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
 using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
@@ -83,13 +82,13 @@ public class WeatherService: IWeatherService
         var airQualityHourlyResponse = await _client.GetHourlyAirQuality(airQualityHourlyReq, ct);
         if (airQualityHourlyResponse is null) return null;
         
-        var airQualitySection = _airQualityProcessor.Process(raw);
-        var feelsLikeSection = _feelsLikeProcessor.Process(raw);
-        var humiditySection = _humidityProcessor.Process(raw);
-        var precipitationSection = _precipitationProcessor.Process(raw);
-        var pressureSection = _pressureProcessor.Process(raw);
-        var uvSection = _uvProcessor.Process(raw);
-        var visibilitySection = _visibilityProcessor.Process(raw);
+        var airQualitySection = _airQualityProcessor.Process(airQualityHourlyResponse);
+        var feelsLikeSection = _feelsLikeProcessor.Process(weatherDailyForecastResponse);
+        var humiditySection = _humidityProcessor.Process(weatherDailyForecastResponse);
+        var precipitationSection = _precipitationProcessor.Process(weatherDailyForecastResponse);
+        var pressureSection = _pressureProcessor.Process(weatherDailyForecastResponse);
+        var uvSection = _uvProcessor.Process(weatherDailyForecastResponse);
+        var visibilitySection = _visibilityProcessor.Process(weatherDailyForecastResponse);
         
         return new DailyForecast
         {
@@ -100,16 +99,16 @@ public class WeatherService: IWeatherService
             PressureDetails = pressureSection,
             SunDetails = new SunDetails
             {
-                SunriseText = raw.WeatherDaily.Sunrise.FirstOrDefault() ?? string.Empty,
-                SunsetText = raw.WeatherDaily.Sunset.FirstOrDefault() ?? string.Empty,
+                SunriseText = weatherDailyForecastResponse.WeatherDaily.Sunrise.FirstOrDefault() ?? string.Empty,
+                SunsetText = weatherDailyForecastResponse.WeatherDaily.Sunset.FirstOrDefault() ?? string.Empty,
             },
             UvDetails = uvSection,
             VisibilityDetails = visibilitySection,
             WindDetails = new WindDetails
             {
-                WindSpeedMps = raw.WeatherDaily.WindSpeed10MMax?.FirstOrDefault() ?? 0,
-                GustSpeedMps = raw.WeatherDaily.WindGusts10MMax?.FirstOrDefault() ?? 0,
-                DirectionDegrees = raw.WeatherDaily.WindDirection10MDominant?.FirstOrDefault() ?? 0
+                WindSpeedMps = weatherDailyForecastResponse.WeatherDaily.WindSpeedMean?.FirstOrDefault() ?? 0,
+                GustSpeedMps = weatherDailyForecastResponse.WeatherDaily.WindGustsMean?.FirstOrDefault() ?? 0,
+                DirectionDegrees = weatherDailyForecastResponse.WeatherDaily.WindDirectionDominant?.FirstOrDefault() ?? 0
             }
         };
     }

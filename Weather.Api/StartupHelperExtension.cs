@@ -41,8 +41,12 @@ public static class StartupHelperExtension
 
         builder.Services.AddScoped<IAirQualityProcessor, AirQualityProcessor>();
         builder.Services.AddScoped<IFeelsLikeProcessor, FeelsLikeProcessor>();
+        builder.Services.AddScoped<IHumidityProcessor, HumidityProcessor>();
+        builder.Services.AddScoped<IPrecipitationProcessor, PrecipitationProcessor>();
+        builder.Services.AddScoped<IPressureProcessor, PressureProcessor>();
         builder.Services.AddScoped<IUvProcessor, UvProcessor>();
-        
+        builder.Services.AddScoped<IVisibilityProcessor, VisibilityProcessor>();
+
         builder.Services.AddScoped<IWeatherService, WeatherService>();
         
         return builder.Build();

@@ -21,8 +21,8 @@ public class OpenMeteoClient: IOpenMeteoClient
     {
         var daily = (request.Daily is { Count: > 0 }
             ? string.Join(",", request.Daily)
-            : "uv_index_max,sunrise,sunset,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant");
-
+            : "temperature_2m_mean,apparent_temperature_mean,sunrise,sunset,uv_index_max,precipitation_sum,visibility_mean,winddirection_10m_dominant,wind_gusts_10m_mean,wind_speed_10m_mean,relative_humidity_2m_mean,surface_pressure_mean");
+        
         var query = new Dictionary<string, string?>
         {
             ["latitude"]       = request.Latitude.ToString(CultureInfo.InvariantCulture),

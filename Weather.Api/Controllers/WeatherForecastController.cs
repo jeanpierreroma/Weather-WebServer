@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Weather.Application;
 using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.Daily;
+using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Api.Controllers;
 
@@ -25,14 +26,23 @@ public class WeatherForecastController : ControllerBase
         CancellationToken ct = default
     )
     {
-        var dto = await _service.GetDailyForecastAsync(new OpenMeteoDailyForecastRequest
-        {
-            Latitude = latitude,
-            Longitude = longitude,
-            ForecastDays = forecast_days,
-            Timezone = timezone,
-            // можеш явно передати Daily, але сервіс і так додасть RequiredDaily
-        }, ct);
+        var dto = await _service.GetDailyForecastAsync(
+            new OpenMeteoWeatherDailyForecastRequest
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                ForecastDays = forecast_days,
+                Timezone = timezone,
+            }, 
+            new OpenMeteoAirQualityHourlyRequest
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                ForecastDays = forecast_days,
+                Timezone = timezone,
+            },
+            ct
+        );
 
         return dto is null ? StatusCode(502, new { error = "Open-Meteo request failed" }) : Ok(dto);
     }

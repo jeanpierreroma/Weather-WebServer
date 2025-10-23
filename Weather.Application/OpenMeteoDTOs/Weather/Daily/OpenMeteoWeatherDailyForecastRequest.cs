@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Application.OpenMeteoDTOs.Daily;
+namespace Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
-public class OpenMeteoDailyForecastRequest
+public class OpenMeteoWeatherDailyForecastRequest
 {
     [JsonPropertyName("latitude")]
     public double Latitude { get; init; }

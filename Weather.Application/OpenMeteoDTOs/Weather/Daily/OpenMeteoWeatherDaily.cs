@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Application.OpenMeteoDTOs.Daily;
+namespace Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
-public sealed class OpenMeteoDaily
+public sealed class OpenMeteoWeatherDaily
 {
     [JsonPropertyName("time")]
     public List<string> Time { get; init; } = new();
@@ -20,11 +20,11 @@ public sealed class OpenMeteoDaily
     public List<double?> PrecipitationSum { get; init; } = new();
 
     [JsonPropertyName("wind_speed_10m_max")]
-    public List<double?> WindSpeed10mMax { get; init; } = new();
+    public List<double?> WindSpeed10MMax { get; init; } = new();
 
     [JsonPropertyName("wind_gusts_10m_max")]
-    public List<double?> WindGusts10mMax { get; init; } = new();
+    public List<double?> WindGusts10MMax { get; init; } = new();
 
     [JsonPropertyName("wind_direction_10m_dominant")]
-    public List<int?> WindDirection10mDominant { get; init; } = new();
+    public List<int?> WindDirection10MDominant { get; init; } = new();
 }

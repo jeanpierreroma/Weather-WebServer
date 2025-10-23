@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Application.OpenMeteoDTOs.Daily;
+namespace Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
-public sealed class OpenMeteoDailyForecastResponse
+public sealed class OpenMeteoWeatherDailyForecastResponse
 {
     [JsonPropertyName("latitude")]
     public double Latitude { get; init; }
@@ -26,8 +26,8 @@ public sealed class OpenMeteoDailyForecastResponse
     public double Elevation { get; init; }
 
     [JsonPropertyName("daily_units")]
-    public OpenMeteoDailyUnits DailyUnits { get; init; } = new();
+    public OpenMeteoWeatherDailyUnits WeatherDailyUnits { get; init; } = new();
 
     [JsonPropertyName("daily")]
-    public OpenMeteoDaily Daily { get; init; } = new();
+    public OpenMeteoWeatherDaily WeatherDaily { get; init; } = new();
 }

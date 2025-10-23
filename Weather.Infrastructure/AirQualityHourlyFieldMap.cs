@@ -1,6 +1,6 @@
 using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
 
-namespace Weather.Application;
+namespace Weather.Infrastructure;
 
 public static class AirQualityHourlyFieldMap
 {

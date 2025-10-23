@@ -1,6 +1,6 @@
 using Weather.Application.OpenMeteoDTOs.Settings;
 
-namespace Weather.Application;
+namespace Weather.Infrastructure;
 
 public static class UnitsMap
 {

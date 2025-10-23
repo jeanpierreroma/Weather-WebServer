@@ -1,4 +1,7 @@
-namespace Weather.Application;
+using Weather.Application;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
+
+namespace Weather.Infrastructure;
 
 public static class WeatherDailyFieldMap
 {

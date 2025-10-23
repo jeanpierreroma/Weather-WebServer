@@ -1,4 +1,4 @@
-namespace Weather.Application;
+namespace Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 public enum WeatherDailyField
 {

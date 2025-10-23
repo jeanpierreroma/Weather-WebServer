@@ -1,9 +1,5 @@
-using System.Globalization;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using Weather.Application;
-using Weather.Application.OpenMeteoDTOs;
 using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
 using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
@@ -21,7 +17,7 @@ public class WeatherForecastController : ControllerBase
     public async Task<IActionResult> GetDailyWeather(
         [FromQuery] double latitude = 52.52,
         [FromQuery] double longitude = 13.41,
-        [FromQuery] int forecast_days = 3,
+        [FromQuery] int forecast_days = 1,
         [FromQuery] string timezone = "auto",
         CancellationToken ct = default
     )

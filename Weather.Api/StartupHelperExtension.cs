@@ -31,11 +31,17 @@ public static class StartupHelperExtension
             });
         });
 
-        builder.Services.AddSingleton<IHttpClientFactory>(_ =>
-            new HttpClientFactory(
-                new Uri("https://api.open-meteo.com/"),
-                c => c.DefaultRequestHeaders.UserAgent.ParseAdd("WeatherApp/1.0")
-            ));
+        builder.Services.AddHttpClient("open-meteo-api", httpClient =>
+        {
+            httpClient.BaseAddress = new Uri("https://api.open-meteo.com/");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("WeatherApp/1.0");
+        });
+
+        builder.Services.AddHttpClient("air-quality-api", httpClient =>
+        {
+            httpClient.BaseAddress = new Uri("https://air-quality-api.open-meteo.com/");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("WeatherApp/1.0");
+        });
 
         builder.Services.AddScoped<IOpenMeteoClient, OpenMeteoClient>();
 

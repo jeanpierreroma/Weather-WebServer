@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text;
 using Weather.Application;
-using Weather.Application.OpenMeteoDTOs;
 using System.Text.Json;
 using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
 using Weather.Application.OpenMeteoDTOs.Weather.Daily;
@@ -10,15 +9,19 @@ namespace Weather.Infrastructure;
 
 public class OpenMeteoClient: IOpenMeteoClient 
 {
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public OpenMeteoClient(IHttpClientFactory factory)
-        => _http = factory.CreateClient("OpenMeteo");
+    {
+        _httpClientFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+    }
     
     public async Task<OpenMeteoWeatherDailyForecastResponse?> GetDailyForecast(
         OpenMeteoWeatherDailyForecastRequest request,
         CancellationToken ct = default)
     {
+        var openMeteoClient = _httpClientFactory.CreateClient("open-meteo-api");
+        
         var daily = (request.Daily is { Count: > 0 }
             ? string.Join(",", request.Daily)
             : "temperature_2m_mean,apparent_temperature_mean,sunrise,sunset,uv_index_max,precipitation_sum,visibility_mean,winddirection_10m_dominant,wind_gusts_10m_mean,wind_speed_10m_mean,relative_humidity_2m_mean,surface_pressure_mean");
@@ -34,7 +37,7 @@ public class OpenMeteoClient: IOpenMeteoClient
 
         var url = BuildUrl("v1/forecast", query);
 
-        using var resp = await _http.GetAsync(url, ct);
+        using var resp = await openMeteoClient.GetAsync(url, ct);
         if (!resp.IsSuccessStatusCode)
             return null;
 
@@ -47,6 +50,8 @@ public class OpenMeteoClient: IOpenMeteoClient
         OpenMeteoAirQualityHourlyRequest request,
         CancellationToken ct = default)
     {
+        var openMeteoAirQaulityClient = _httpClientFactory.CreateClient("air-quality-api");
+        
         var hourly = (request.Hourly is { Count: > 0 }
             ? string.Join(",", request.Hourly)
             : "european_aqi");
@@ -62,7 +67,7 @@ public class OpenMeteoClient: IOpenMeteoClient
         
         var url = BuildUrl("v1/air-quality", query);
         
-        using var resp = await _http.GetAsync(url, ct);
+        using var resp = await openMeteoAirQaulityClient.GetAsync(url, ct);
         if (!resp.IsSuccessStatusCode)
             return null;
 

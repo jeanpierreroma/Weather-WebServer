@@ -9,11 +9,23 @@ public class WeatherService: IWeatherService
 {
     private static readonly string[] RequiredDaily =
     [
+        "temperature_2m_mean",
+        "apparent_temperature_mean",
+        "sunrise",
+        "sunset",
         "uv_index_max",
         "precipitation_sum",
-        "wind_speed_10m_max",
-        "wind_gusts_10m_max",
-        "wind_direction_10m_dominant"
+        "visibility_mean",
+        "winddirection_10m_dominant",
+        "wind_gusts_10m_mean",
+        "wind_speed_10m_mean",
+        "relative_humidity_2m_mean",
+        "surface_pressure_mean"
+    ];
+
+    private static readonly string[] RequiredHourly =
+    [
+        "european_aqi"
     ];
     
     private readonly IOpenMeteoClient _client;
@@ -66,7 +78,7 @@ public class WeatherService: IWeatherService
         if (airQualityHourlyRequest.Hourly is { Count: > 0 })
             foreach (var h in airQualityHourlyRequest.Hourly) hourly.Add(h);
 
-        foreach (var r in RequiredDaily) daily.Add(r);
+        foreach (var r in RequiredHourly) hourly.Add(r);
 
         var airQualityHourlyReq = new OpenMeteoAirQualityHourlyRequest
         {

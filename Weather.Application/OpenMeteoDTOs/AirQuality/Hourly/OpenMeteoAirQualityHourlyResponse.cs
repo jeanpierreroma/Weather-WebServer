@@ -28,6 +28,6 @@ public class OpenMeteoAirQualityHourlyResponse
     [JsonPropertyName("hourly_units")]
     public OpenMeteoAirQualityHourlyUnits HourlyUnits { get; init; } = new();
 
-    [JsonPropertyName("daily")]
+    [JsonPropertyName("hourly")]
     public OpenMeteoAirQualityHourly Hourly { get; init; } = new();
 }

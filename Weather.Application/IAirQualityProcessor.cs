@@ -1,10 +1,11 @@
 using Weather.Application.DTOs;
 using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.Daily;
+using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
 public interface IAirQualityProcessor
 {
-    AirQualityDetails Process(OpenMeteoDailyForecastResponse raw);
+    AirQualityDetails Process(OpenMeteoAirQualityHourlyResponse raw);
 }

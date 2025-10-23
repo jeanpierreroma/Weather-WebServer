@@ -1,9 +1,11 @@
 using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.Daily;
+using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
 public interface IOpenMeteoClient
 {
-    Task<OpenMeteoDailyForecastResponse?> GetDailyForecast(OpenMeteoDailyForecastRequest request, CancellationToken ct);
+    Task<OpenMeteoWeatherDailyForecastResponse?> GetDailyForecast(OpenMeteoWeatherDailyForecastRequest request, CancellationToken ct);
+    Task<OpenMeteoAirQualityHourlyResponse?> GetHourlyAirQuality(OpenMeteoAirQualityHourlyRequest request, CancellationToken ct);
 }

@@ -4,7 +4,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IPrecipitationProcessor
-{
-    PrecipitationDetails Process(OpenMeteoWeatherDailyForecastResponse raw);
-}
+public interface IPrecipitationProcessor : IDailyProcessor<PrecipitationDetails> {}

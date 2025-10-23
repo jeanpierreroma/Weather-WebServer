@@ -4,7 +4,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IPressureProcessor
-{
-    PressureDetails Process(OpenMeteoWeatherDailyForecastResponse raw);
-}
+public interface IPressureProcessor : IDailyProcessor<PressureDetails> {}

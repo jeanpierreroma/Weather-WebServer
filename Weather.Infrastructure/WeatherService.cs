@@ -7,115 +7,58 @@ namespace Weather.Infrastructure;
 
 public class WeatherService: IWeatherService
 {
-    private static readonly string[] RequiredDaily =
-    [
-        "temperature_2m_mean",
-        "apparent_temperature_mean",
-        "sunrise",
-        "sunset",
-        "uv_index_max",
-        "precipitation_sum",
-        "visibility_mean",
-        "winddirection_10m_dominant",
-        "wind_gusts_10m_mean",
-        "wind_speed_10m_mean",
-        "relative_humidity_2m_mean",
-        "surface_pressure_mean"
-    ];
-
-    private static readonly string[] RequiredHourly =
-    [
-        "european_aqi"
-    ];
-    
     private readonly IOpenMeteoClient _client;
-
     private readonly IAirQualityProcessor _airQualityProcessor;
-    private readonly IFeelsLikeProcessor _feelsLikeProcessor;
-    private readonly IHumidityProcessor _humidityProcessor;
-    private readonly IPrecipitationProcessor _precipitationProcessor;
-    private readonly IPressureProcessor _pressureProcessor;
-    private readonly IUvProcessor _uvProcessor;
-    private readonly IVisibilityProcessor _visibilityProcessor;
+    private readonly IDailySectionsAggregator _dailyAggregator;
     
-    public WeatherService(IOpenMeteoClient client, IUvProcessor uvProcessor, IAirQualityProcessor airQualityProcessor, IFeelsLikeProcessor feelsLikeProcessor, IHumidityProcessor humidityProcessor, IPrecipitationProcessor precipitationProcessor, IPressureProcessor pressureProcessor, IVisibilityProcessor visibilityProcessor)
+    public WeatherService(
+        IOpenMeteoClient client, 
+        IAirQualityProcessor airQualityProcessor, 
+        IDailySectionsAggregator dailyAggregator)
     {
         _client = client;
-        
         _airQualityProcessor = airQualityProcessor;
-        _feelsLikeProcessor = feelsLikeProcessor;
-        _humidityProcessor = humidityProcessor;
-        _precipitationProcessor = precipitationProcessor;
-        _pressureProcessor = pressureProcessor;
-        _uvProcessor = uvProcessor;
-        _visibilityProcessor = visibilityProcessor;
+        _dailyAggregator = dailyAggregator;
     }    
     
-    public async Task<DailyForecast?> GetDailyForecastAsync(
-        OpenMeteoWeatherDailyForecastRequest weatherDailyForecastRequest, 
-        OpenMeteoAirQualityHourlyRequest airQualityHourlyRequest,
-        CancellationToken ct)
+    public async Task<DailyForecast?> GetDailyForecastAsync(double latitude, double longitude, CancellationToken ct)
     {
-        var daily = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (weatherDailyForecastRequest.Daily is { Count: > 0 })
-            foreach (var d in weatherDailyForecastRequest.Daily) daily.Add(d);
-
-        foreach (var r in RequiredDaily) daily.Add(r);
-
-        var weatherDailyForecastReq = new OpenMeteoWeatherDailyForecastRequest
-        {
-            Latitude = weatherDailyForecastRequest.Latitude,
-            Longitude = weatherDailyForecastRequest.Longitude,
-            ForecastDays = weatherDailyForecastRequest.ForecastDays,
-            Timezone = string.IsNullOrWhiteSpace(weatherDailyForecastRequest.Timezone) ? "auto" : weatherDailyForecastRequest.Timezone,
-            Daily = daily.ToArray()
-        };
+        Task<OpenMeteoWeatherDailyForecastResponse?> weatherDailyForecastTask = _client.GetDailyForecast(
+            latitude: latitude,
+            longitude: longitude,
+            ct: ct
+        );
         
-        var weatherDailyForecastResponse = await _client.GetDailyForecast(weatherDailyForecastRequest, ct);
-        if (weatherDailyForecastResponse is null) return null;
+        Task<OpenMeteoAirQualityHourlyResponse?> airQualityHourlyTask = _client.GetHourlyAirQuality(
+            latitude: latitude,
+            longitude: longitude,
+            ct: ct
+        );
         
-        var hourly = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (airQualityHourlyRequest.Hourly is { Count: > 0 })
-            foreach (var h in airQualityHourlyRequest.Hourly) hourly.Add(h);
-
-        foreach (var r in RequiredHourly) hourly.Add(r);
-
-        var airQualityHourlyReq = new OpenMeteoAirQualityHourlyRequest
-        {
-            Latitude = airQualityHourlyRequest.Latitude,
-            Longitude = airQualityHourlyRequest.Longitude,
-            ForecastDays = airQualityHourlyRequest.ForecastDays,
-            Timezone = string.IsNullOrWhiteSpace(airQualityHourlyRequest.Timezone)
-                ? "auto"
-                : airQualityHourlyRequest.Timezone,
-            Hourly = hourly.ToArray()
-        };
-
-        var airQualityHourlyResponse = await _client.GetHourlyAirQuality(airQualityHourlyReq, ct);
-        if (airQualityHourlyResponse is null) return null;
+        await Task.WhenAll(weatherDailyForecastTask, airQualityHourlyTask);
         
-        var airQualitySection = _airQualityProcessor.Process(airQualityHourlyResponse);
-        var feelsLikeSection = _feelsLikeProcessor.Process(weatherDailyForecastResponse);
-        var humiditySection = _humidityProcessor.Process(weatherDailyForecastResponse);
-        var precipitationSection = _precipitationProcessor.Process(weatherDailyForecastResponse);
-        var pressureSection = _pressureProcessor.Process(weatherDailyForecastResponse);
-        var uvSection = _uvProcessor.Process(weatherDailyForecastResponse);
-        var visibilitySection = _visibilityProcessor.Process(weatherDailyForecastResponse);
+        OpenMeteoWeatherDailyForecastResponse? weatherDailyForecastResponse = weatherDailyForecastTask.Result;
+        OpenMeteoAirQualityHourlyResponse? airQualityHourlyResponse = airQualityHourlyTask.Result;
+        
+        if (weatherDailyForecastResponse is null || airQualityHourlyResponse is null) return null;
+        
+        AirQualityDetails airQualitySection = _airQualityProcessor.Process(airQualityHourlyResponse);
+        ProcessedDailySections dailySections = await _dailyAggregator.ProcessAsync(weatherDailyForecastResponse, ct);
         
         return new DailyForecast
         {
             AirQualityDetails = airQualitySection,
-            FeelsLikeDetails = feelsLikeSection,
-            HumidityDetails = humiditySection,
-            PrecipitationDetails = precipitationSection,
-            PressureDetails = pressureSection,
+            FeelsLikeDetails = dailySections.FeelsLike,
+            HumidityDetails = dailySections.Humidity,
+            PrecipitationDetails = dailySections.Precipitation,
+            PressureDetails = dailySections.Pressure,
             SunDetails = new SunDetails
             {
                 SunriseText = weatherDailyForecastResponse.WeatherDaily.Sunrise.FirstOrDefault() ?? string.Empty,
                 SunsetText = weatherDailyForecastResponse.WeatherDaily.Sunset.FirstOrDefault() ?? string.Empty,
             },
-            UvDetails = uvSection,
-            VisibilityDetails = visibilitySection,
+            UvDetails = dailySections.Uv,
+            VisibilityDetails = dailySections.Visibility,
             WindDetails = new WindDetails
             {
                 WindSpeedMps = weatherDailyForecastResponse.WeatherDaily.WindSpeedMean?.FirstOrDefault() ?? 0,

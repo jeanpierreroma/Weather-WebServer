@@ -5,7 +5,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IAirQualityProcessor
-{
-    AirQualityDetails Process(OpenMeteoAirQualityHourlyResponse raw);
-}
+public interface IAirQualityProcessor : IHourlyProcessor<AirQualityDetails> {}

@@ -4,7 +4,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IVisibilityProcessor
-{
-    VisibilityDetails Process(OpenMeteoWeatherDailyForecastResponse raw);
-}
+public interface IVisibilityProcessor : IDailyProcessor<VisibilityDetails> {}

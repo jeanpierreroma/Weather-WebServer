@@ -4,7 +4,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IUvProcessor
-{
-    UvDetails Process(OpenMeteoWeatherDailyForecastResponse raw);
-}
+public interface IUvProcessor : IDailyProcessor<UvDetails> {}

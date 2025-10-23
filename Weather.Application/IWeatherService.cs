@@ -8,9 +8,8 @@ namespace Weather.Application;
 public interface IWeatherService
 {
     Task<DailyForecast?> GetDailyForecastAsync(
-        OpenMeteoWeatherDailyForecastRequest weatherDailyForecastRequest, 
-        OpenMeteoAirQualityHourlyRequest airQualityHourlyRequest,
+        double latitude,
+        double longitude,
         CancellationToken ct
     );
-    
 }

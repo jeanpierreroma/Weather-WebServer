@@ -4,7 +4,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IFeelsLikeProcessor
-{
-    FeelsLikeDetails Process(OpenMeteoWeatherDailyForecastResponse raw);
-}
+public interface IFeelsLikeProcessor : IDailyProcessor<FeelsLikeDetails> {}

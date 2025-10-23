@@ -4,7 +4,4 @@ using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Application;
 
-public interface IHumidityProcessor
-{
-    HumidityDetails Process(OpenMeteoWeatherDailyForecastResponse raw);
-}
+public interface IHumidityProcessor : IDailyProcessor<HumidityDetails> {}

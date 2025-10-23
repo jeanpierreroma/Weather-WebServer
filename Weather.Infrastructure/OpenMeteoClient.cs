@@ -1,95 +1,86 @@
-using System.Globalization;
-using System.Text;
+using System.Net.Http.Json;
 using Weather.Application;
 using System.Text.Json;
+using Weather.Application.Core;
 using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Application.OpenMeteoDTOs.Settings;
 using Weather.Application.OpenMeteoDTOs.Weather.Daily;
+using IHttpClientFactory = Weather.Application.Core.IHttpClientFactory;
 
 namespace Weather.Infrastructure;
 
-public class OpenMeteoClient: IOpenMeteoClient 
+public sealed class OpenMeteoClient(IHttpClientFactory httpClientFactory)
+    : NetworkServiceBase(httpClientFactory), IOpenMeteoClient 
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public OpenMeteoClient(IHttpClientFactory factory)
-    {
-        _httpClientFactory = factory ?? throw new ArgumentNullException(nameof(factory));
-    }
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
     
     public async Task<OpenMeteoWeatherDailyForecastResponse?> GetDailyForecast(
-        OpenMeteoWeatherDailyForecastRequest request,
-        CancellationToken ct = default)
+        double latitude, 
+        double longitude, 
+        CancellationToken ct, 
+        int forecastDays = 1,
+        string timezone = "auto", 
+        OpenMeteoSettings? settings = null, 
+        params WeatherDailyField[] dailyFields)
     {
-        var openMeteoClient = _httpClientFactory.CreateClient("open-meteo-api");
-        
-        var daily = (request.Daily is { Count: > 0 }
-            ? string.Join(",", request.Daily)
-            : "temperature_2m_mean,apparent_temperature_mean,sunrise,sunset,uv_index_max,precipitation_sum,visibility_mean,winddirection_10m_dominant,wind_gusts_10m_mean,wind_speed_10m_mean,relative_humidity_2m_mean,surface_pressure_mean");
-        
-        var query = new Dictionary<string, string?>
-        {
-            ["latitude"]       = request.Latitude.ToString(CultureInfo.InvariantCulture),
-            ["longitude"]      = request.Longitude.ToString(CultureInfo.InvariantCulture),
-            ["forecast_days"]  = request.ForecastDays.ToString(CultureInfo.InvariantCulture),
-            ["timezone"]       = string.IsNullOrWhiteSpace(request.Timezone) ? "auto" : request.Timezone,
-            ["daily"]          = daily
-        };
-
-        var url = BuildUrl("v1/forecast", query);
-
-        using var resp = await openMeteoClient.GetAsync(url, ct);
-        if (!resp.IsSuccessStatusCode)
-            return null;
-
-        await using var s = await resp.Content.ReadAsStreamAsync(ct);
-        var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        return await JsonSerializer.DeserializeAsync<OpenMeteoWeatherDailyForecastResponse>(s, opts, ct);
-    }
-
-    public async Task<OpenMeteoAirQualityHourlyResponse?> GetHourlyAirQuality(
-        OpenMeteoAirQualityHourlyRequest request,
-        CancellationToken ct = default)
-    {
-        var openMeteoAirQaulityClient = _httpClientFactory.CreateClient("air-quality-api");
-        
-        var hourly = (request.Hourly is { Count: > 0 }
-            ? string.Join(",", request.Hourly)
-            : "european_aqi");
-        
-        var query = new Dictionary<string, string?>
-        {
-            ["latitude"]       = request.Latitude.ToString(CultureInfo.InvariantCulture),
-            ["longitude"]      = request.Longitude.ToString(CultureInfo.InvariantCulture),
-            ["forecast_days"]  = request.ForecastDays.ToString(CultureInfo.InvariantCulture),
-            ["timezone"]       = string.IsNullOrWhiteSpace(request.Timezone) ? "auto" : request.Timezone,
-            ["hourly"]         = hourly
-        };
-        
-        var url = BuildUrl("v1/air-quality", query);
-        
-        using var resp = await openMeteoAirQaulityClient.GetAsync(url, ct);
-        if (!resp.IsSuccessStatusCode)
-            return null;
-
-        await using var s = await resp.Content.ReadAsStreamAsync(ct);
-        var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        return await JsonSerializer.DeserializeAsync<OpenMeteoAirQualityHourlyResponse>(s, opts, ct);
+        OpenMeteoWeatherDailyForecastRequest request = OpenMeteoRequestBuilder.BuildWeatherDailyForecastRequest(latitude, longitude, forecastDays, timezone, settings,
+            dailyFields);
+        OpenMeteoWeatherDailyForecastResponse? response = await PerformFetchingWeatherDailyForecast(request, ct);
+        return response;
     }
     
-    private static string BuildUrl(string path, IDictionary<string, string?> query)
+    public async Task<OpenMeteoAirQualityHourlyResponse?> GetHourlyAirQuality(
+        double latitude,
+        double longitude,
+        CancellationToken ct,
+        int forecastDays = 1,
+        string timezone = "auto",
+        OpenMeteoSettings? settings = null,
+        params AirQualityHourlyField[] hourlyFields)
     {
-        var sb = new StringBuilder(path);
-        var first = true;
-        foreach (var kv in query)
-        {
-            if (string.IsNullOrEmpty(kv.Value)) continue;
+        OpenMeteoAirQualityHourlyRequest request =
+            OpenMeteoRequestBuilder.BuildAirQualityHourlyRequest(latitude, longitude, forecastDays, timezone, settings,
+                hourlyFields);
+        OpenMeteoAirQualityHourlyResponse? response = await PerformFetchingAirQualityHourly(request, ct);
+        return response;
+    }
 
-            sb.Append(first ? '?' : '&');
-            sb.Append(Uri.EscapeDataString(kv.Key));
-            sb.Append('=');
-            sb.Append(Uri.EscapeDataString(kv.Value!));
-            first = false;
+    private async Task<OpenMeteoAirQualityHourlyResponse?> PerformFetchingAirQualityHourly(
+        OpenMeteoAirQualityHourlyRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            HttpResponseMessage response = await CreateHttpClient("air-quality-api")
+                .PostAsJsonAsync(NetworkConfig.AirQuality, request, cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            return await JsonSerializer.DeserializeAsync<OpenMeteoAirQualityHourlyResponse>(
+                stream, JsonOptions, cancellationToken);
         }
-        return sb.ToString();
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to fetch air quality. Error: {e.Message}", e);
+        }
+    }
+    
+    private async Task<OpenMeteoWeatherDailyForecastResponse?> PerformFetchingWeatherDailyForecast(
+        OpenMeteoWeatherDailyForecastRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            HttpResponseMessage response = await CreateHttpClient("open-meteo-api")
+                .PostAsJsonAsync(NetworkConfig.WeatherForecast, request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            return await JsonSerializer.DeserializeAsync<OpenMeteoWeatherDailyForecastResponse>(stream, JsonOptions,
+                cancellationToken);
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to fetch weather forecast. Error: {e.Message}", e);
+        }
     }
 }

@@ -12,7 +12,6 @@ public static class StartupHelperExtension
         builder.Services.AddControllers();
         
         // Add OpenAPI (Swagger) support
-        builder.Services.AddOpenApi();
         builder.Services.AddEndpointsApiExplorer();
         
         // Add Swagger
@@ -53,6 +52,8 @@ public static class StartupHelperExtension
         builder.Services.AddScoped<IUvProcessor, UvProcessor>();
         builder.Services.AddScoped<IVisibilityProcessor, VisibilityProcessor>();
 
+        builder.Services.AddScoped<IDailySectionsAggregator, DailySectionsAggregator>();
+        
         builder.Services.AddScoped<IWeatherService, WeatherService>();
         
         return builder.Build();

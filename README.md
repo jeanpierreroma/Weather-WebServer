@@ -11,37 +11,6 @@ This repository contains a small ASP.NET Core solution that provides weather-rel
 
 The solution is intended as a simple reference app for integrating weather data providers and organizing processing logic into small, testable components.
 
-## Build & run (Windows)
-
-Prerequisites: .NET SDK 6.0+ installed and available on PATH.
-
-1. Open a terminal in the repository root (where `Weather-WebServer.sln` lives).
-2. Restore and build the solution:
-
-	dotnet restore; dotnet build
-
-3. Run the API project (from the solution root):
-
-	dotnet run --project Weather.Api
-
-By default the API uses the launch settings in `Weather.Api/Properties/launchSettings.json`. For local development set environment variables or edit `appsettings.Development.json` as needed.
-
-## Development notes
-
-- The code intentionally separates contracts (interfaces) in `Weather.Application` from implementations in `Weather.Infrastructure` to make the system easier to test and replace providers.
-- External HTTP calls are performed via `OpenMeteoClient` in `Weather.Infrastructure`.
-- Processors like `UvProcessor` and `AirQualityProcessor` encapsulate domain-specific transformation logic.
-
-## Contribution / PR guidance
-
-- This repository is organized as a simple example; avoid changing public interfaces without a clear migration path.
-- Keep changes small and focused. Add unit tests for behavior changes when possible.
-- If you add functionality that requires configuration (API keys, endpoints), prefer using `appsettings.{Environment}.json` and environment overrides.
-
----
-
-If you'd like, I can now create small documentation commits or add a CONTRIBUTING.md — tell me which you'd prefer next.
-
 Projects:
 - Weather.Api — ASP.NET Core Web API
 - Weather.Application — Application interfaces and DTOs

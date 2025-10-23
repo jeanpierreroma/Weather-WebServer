@@ -17,28 +17,10 @@ public class WeatherForecastController : ControllerBase
     public async Task<IActionResult> GetDailyWeather(
         [FromQuery] double latitude = 52.52,
         [FromQuery] double longitude = 13.41,
-        [FromQuery] int forecast_days = 1,
-        [FromQuery] string timezone = "auto",
         CancellationToken ct = default
     )
     {
-        var dto = await _service.GetDailyForecastAsync(
-            new OpenMeteoWeatherDailyForecastRequest
-            {
-                Latitude = latitude,
-                Longitude = longitude,
-                ForecastDays = forecast_days,
-                Timezone = timezone,
-            }, 
-            new OpenMeteoAirQualityHourlyRequest
-            {
-                Latitude = latitude,
-                Longitude = longitude,
-                ForecastDays = forecast_days,
-                Timezone = timezone,
-            },
-            ct
-        );
+        var dto = await _service.GetDailyForecastAsync(latitude, longitude, ct);
 
         return dto is null ? StatusCode(502, new { error = "Open-Meteo request failed" }) : Ok(dto);
     }

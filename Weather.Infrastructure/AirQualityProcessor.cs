@@ -1,37 +1,36 @@
 using Weather.Application;
 using Weather.Application.DTOs;
 using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.Daily;
+using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Domain.ValueObjects;
 
 namespace Weather.Infrastructure;
 
 public class AirQualityProcessor : IAirQualityProcessor
 {
-    public AirQualityDetails Process(OpenMeteoDailyForecastResponse raw)
+    public AirQualityDetails Process(OpenMeteoAirQualityHourlyResponse raw)
     {
-        if (raw?.Daily?. == null || raw.Daily.UvIndexMax.Count == 0)
+        if (raw.Hourly.EuropeanAqi == null || raw.Hourly.EuropeanAqi.Count == 0)
         {
-            throw new ArgumentException("uv_index_max is missing in Open-Meteo response.");
+            throw new ArgumentException("european_aqi is missing in Open-Meteo response.");
         }
         
-        double? uvIndex = raw.Daily.UvIndexMax.FirstOrDefault();
+        // Average
+        double aqiMean = raw.Hourly.EuropeanAqi.Average();
         
-        if (!uvIndex.HasValue)
-            throw new ArgumentException("uv_index_max[0] is null.");
-        
-        var value = Math.Max(0, uvIndex.Value);
+        var value = Math.Max(0, aqiMean);
         
         value = Math.Round(value, 1, MidpointRounding.AwayFromZero);
         
-        var risk = ToRisk(value);
-        var riskName = RiskToString(risk);
-        var summary = BuildSummary(risk);
+        var category = ToCategory(value);
+        var categoryString = CategoryToString(category);
+        var summary = BuildSummary(category);
 
-        return new UvDetails
+        return new AirQualityDetails
         {
-            UvIndexValueMax = value,
-            UvIndexRiskCategoryName = riskName,
+            AirQualityIndex = value,
+            AirQualityDetailsCategoryName = categoryString,
             Summary = summary
         };
     }

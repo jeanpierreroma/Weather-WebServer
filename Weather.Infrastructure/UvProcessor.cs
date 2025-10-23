@@ -1,19 +1,19 @@
 using Weather.Application;
 using Weather.Application.DTOs;
 using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.Daily;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Domain.ValueObjects;
 
 namespace Weather.Infrastructure;
 
 public class UvProcessor: IUvProcessor
 {
-    public UvDetails Process(OpenMeteoDailyForecastResponse raw)
+    public UvDetails Process(OpenMeteoWeatherDailyForecastResponse raw)
     {
-        if (raw?.Daily?.UvIndexMax == null || raw.Daily.UvIndexMax.Count == 0)
+        if (raw?.WeatherDaily?.UvIndexMax == null || raw.WeatherDaily.UvIndexMax.Count == 0)
             throw new ArgumentException("uv_index_max is missing in Open-Meteo response.");
         
-        double? uvIndex = raw.Daily.UvIndexMax.FirstOrDefault();
+        double? uvIndex = raw.WeatherDaily.UvIndexMax.FirstOrDefault();
         
         if (!uvIndex.HasValue)
             throw new ArgumentException("uv_index_max[0] is null.");

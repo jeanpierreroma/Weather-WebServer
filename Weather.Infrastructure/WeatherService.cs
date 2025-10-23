@@ -1,7 +1,8 @@
 using Weather.Application;
 using Weather.Application.DTOs;
 using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.Daily;
+using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Infrastructure;
 
@@ -39,25 +40,48 @@ public class WeatherService: IWeatherService
         _visibilityProcessor = visibilityProcessor;
     }    
     
-    public async Task<DailyForecast?> GetDailyForecastAsync(OpenMeteoDailyForecastRequest request, CancellationToken ct)
+    public async Task<DailyForecast?> GetDailyForecastAsync(
+        OpenMeteoWeatherDailyForecastRequest weatherDailyForecastRequest, 
+        OpenMeteoAirQualityHourlyRequest airQualityHourlyRequest,
+        CancellationToken ct)
     {
         var daily = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (request.Daily is { Count: > 0 })
-            foreach (var d in request.Daily) daily.Add(d);
+        if (weatherDailyForecastRequest.Daily is { Count: > 0 })
+            foreach (var d in weatherDailyForecastRequest.Daily) daily.Add(d);
 
         foreach (var r in RequiredDaily) daily.Add(r);
 
-        var req = new OpenMeteoDailyForecastRequest
+        var weatherDailyForecastReq = new OpenMeteoWeatherDailyForecastRequest
         {
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
-            ForecastDays = request.ForecastDays,
-            Timezone = string.IsNullOrWhiteSpace(request.Timezone) ? "auto" : request.Timezone,
+            Latitude = weatherDailyForecastRequest.Latitude,
+            Longitude = weatherDailyForecastRequest.Longitude,
+            ForecastDays = weatherDailyForecastRequest.ForecastDays,
+            Timezone = string.IsNullOrWhiteSpace(weatherDailyForecastRequest.Timezone) ? "auto" : weatherDailyForecastRequest.Timezone,
             Daily = daily.ToArray()
         };
         
-        var raw = await _client.GetDailyForecast(req, ct);
-        if (raw is null) return null;
+        var weatherDailyForecastResponse = await _client.GetDailyForecast(weatherDailyForecastRequest, ct);
+        if (weatherDailyForecastResponse is null) return null;
+        
+        var hourly = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (airQualityHourlyRequest.Hourly is { Count: > 0 })
+            foreach (var h in airQualityHourlyRequest.Hourly) hourly.Add(h);
+
+        foreach (var r in RequiredDaily) daily.Add(r);
+
+        var airQualityHourlyReq = new OpenMeteoAirQualityHourlyRequest
+        {
+            Latitude = airQualityHourlyRequest.Latitude,
+            Longitude = airQualityHourlyRequest.Longitude,
+            ForecastDays = airQualityHourlyRequest.ForecastDays,
+            Timezone = string.IsNullOrWhiteSpace(airQualityHourlyRequest.Timezone)
+                ? "auto"
+                : airQualityHourlyRequest.Timezone,
+            Hourly = hourly.ToArray()
+        };
+
+        var airQualityHourlyResponse = await _client.GetHourlyAirQuality(airQualityHourlyReq, ct);
+        if (airQualityHourlyResponse is null) return null;
         
         var airQualitySection = _airQualityProcessor.Process(raw);
         var feelsLikeSection = _feelsLikeProcessor.Process(raw);
@@ -76,16 +100,16 @@ public class WeatherService: IWeatherService
             PressureDetails = pressureSection,
             SunDetails = new SunDetails
             {
-                SunriseText = raw.Daily.Sunrise.FirstOrDefault() ?? string.Empty,
-                SunsetText = raw.Daily.Sunset.FirstOrDefault() ?? string.Empty,
+                SunriseText = raw.WeatherDaily.Sunrise.FirstOrDefault() ?? string.Empty,
+                SunsetText = raw.WeatherDaily.Sunset.FirstOrDefault() ?? string.Empty,
             },
             UvDetails = uvSection,
             VisibilityDetails = visibilitySection,
             WindDetails = new WindDetails
             {
-                WindSpeedMps = raw.Daily.WindSpeed10mMax?.FirstOrDefault() ?? 0,
-                GustSpeedMps = raw.Daily.WindGusts10mMax?.FirstOrDefault() ?? 0,
-                DirectionDegrees = raw.Daily.WindDirection10mDominant?.FirstOrDefault() ?? 0
+                WindSpeedMps = raw.WeatherDaily.WindSpeed10MMax?.FirstOrDefault() ?? 0,
+                GustSpeedMps = raw.WeatherDaily.WindGusts10MMax?.FirstOrDefault() ?? 0,
+                DirectionDegrees = raw.WeatherDaily.WindDirection10MDominant?.FirstOrDefault() ?? 0
             }
         };
     }

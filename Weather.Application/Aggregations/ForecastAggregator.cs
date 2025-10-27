@@ -1,5 +1,7 @@
 using Weather.Application.Abstraction;
 using Weather.Application.DTOs;
+using Weather.Application.DTOs.Processed;
+using Weather.Application.DTOs.Responses;
 using Weather.Application.Processors;
 
 namespace Weather.Application.Aggregations;

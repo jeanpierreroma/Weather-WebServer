@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Weather.Application.Abstraction;
 using Weather.Application.DTOs;
+using Weather.Application.DTOs.Requests;
+using Weather.Application.DTOs.Responses;
 using Weather.Application.Networking;
 using Weather.Infrastructure.OpenMeteo.Mappers;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;

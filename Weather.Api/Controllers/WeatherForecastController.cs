@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Weather.Application;
 using Weather.Application.Abstraction;
 using Weather.Application.DTOs;
+using Weather.Application.DTOs.Requests;
 using Weather.Application.Services;
 
 namespace Weather.Api.Controllers;

@@ -1,4 +1,6 @@
 using Weather.Application.DTOs;
+using Weather.Application.DTOs.Responses;
+using Weather.Application.DTOs.Responses.Details;
 using Weather.Application.Processors;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 

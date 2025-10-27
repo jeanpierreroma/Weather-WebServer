@@ -1,6 +1,6 @@
 namespace Weather.Infrastructure.Nasa.NasaDTOs;
 
-public class NasaRequest
+public class NasaDialAMoonRequest
 {
-    
+    public string Timestamp { get; init; } = null!;
 }

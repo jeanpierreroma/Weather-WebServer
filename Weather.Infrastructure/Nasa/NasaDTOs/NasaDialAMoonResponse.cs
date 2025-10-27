@@ -2,19 +2,19 @@ using System.Text.Json.Serialization;
 
 namespace Weather.Infrastructure.Nasa.NasaDTOs;
 
-public class NasaResponse
+public class NasaDialAMoonResponse
 {
     [JsonPropertyName("image")]
-    public NasaDialAMoonImage DialAMoonImage { get; set; } = null!;
+    public NasaDialAMoonImage Image { get; set; } = null!;
     
     [JsonPropertyName("image_highres")]
-    public NasaDialAMoonImage DialAMoonImageHighres { get; set; } = null!;
+    public NasaDialAMoonImage ImageHighres { get; set; } = null!;
     
     [JsonPropertyName("su_image")]
-    public NasaDialAMoonImage SuDialAMoonImage { get; set; } = null!;
+    public NasaDialAMoonImage SuImage { get; set; } = null!;
     
     [JsonPropertyName("su_image_highres")]
-    public NasaDialAMoonImage SuDialAMoonImageHighres { get; set; } = null!;
+    public NasaDialAMoonImage SuImageHighres { get; set; } = null!;
     
     [JsonPropertyName("time")]
     public string Time { get; set; } = null!;

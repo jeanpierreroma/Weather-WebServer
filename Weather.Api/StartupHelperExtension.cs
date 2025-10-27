@@ -5,6 +5,7 @@ using Weather.Application.Aggregations;
 using Weather.Application.Processors;
 using Weather.Application.Services;
 using Weather.Infrastructure;
+using Weather.Infrastructure.Nasa;
 using Weather.Infrastructure.OpenMeteo;
 using Weather.Infrastructure.Processors;
 
@@ -46,6 +47,12 @@ public static class StartupHelperExtension
             httpClient.BaseAddress = new Uri("https://air-quality-api.open-meteo.com/");
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("WeatherApp/1.0");
         });
+        
+        builder.Services.AddHttpClient("nasa-svs", httpClient =>
+        {
+            httpClient.BaseAddress = new Uri("https://svs.gsfc.nasa.gov/api/");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("WeatherApp/1.0");
+        });
 
         builder.Services.AddScoped<IAirQualityProcessor, AirQualityProcessor>();
         builder.Services.AddScoped<IFeelsLikeProcessor, FeelsLikeProcessor>();
@@ -59,6 +66,7 @@ public static class StartupHelperExtension
         builder.Services.AddScoped<IWeatherService, WeatherService>();
         
         builder.Services.AddScoped<IForecastProvider, OpenMeteoClient>();
+        builder.Services.AddScoped<IMoonProvider, NasaClient>();
         
         return builder.Build();
     }

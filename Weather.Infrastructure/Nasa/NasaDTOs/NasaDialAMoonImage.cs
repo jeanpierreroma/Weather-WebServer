@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Weather.Infrastructure.Nasa.NasaDTOs;
 
-public class NasaImage
+public class NasaDialAMoonImage
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

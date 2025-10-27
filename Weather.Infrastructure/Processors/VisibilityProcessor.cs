@@ -1,18 +1,17 @@
-using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Application.Processors;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Infrastructure;
+namespace Weather.Infrastructure.Processors;
 
 public class VisibilityProcessor : IVisibilityProcessor
 {
-    public VisibilityDetails Process(OpenMeteoWeatherDailyForecastResponse raw)
+    public VisibilityDetails Process(ForecastData raw)
     {
-        if (raw?.WeatherDaily?.VisibilityMean == null || raw.WeatherDaily.VisibilityMean.Count == 0)
+        if (raw?.Daily?.VisibilityMean == null || raw.Daily.VisibilityMean.Count == 0)
             throw new ArgumentException("visibility_mean is missing in Open-Meteo response.");
         
-        double? visibilityMeanOptional = raw.WeatherDaily.VisibilityMean.FirstOrDefault();
+        double? visibilityMeanOptional = raw.Daily.VisibilityMean.FirstOrDefault();
         
         if (!visibilityMeanOptional.HasValue)
             throw new ArgumentException("visibility_mean[0] is null.");

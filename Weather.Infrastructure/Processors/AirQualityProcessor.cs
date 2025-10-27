@@ -1,16 +1,13 @@
-using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs;
-using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Application.Processors;
 using Weather.Domain.ValueObjects;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
 
-namespace Weather.Infrastructure;
+namespace Weather.Infrastructure.Processors;
 
 public class AirQualityProcessor : IAirQualityProcessor
 {
-    public AirQualityDetails Process(OpenMeteoAirQualityHourlyResponse raw)
+    public AirQualityDetails Process(ForecastData raw)
     {
         if (raw.Hourly.EuropeanAqi == null || raw.Hourly.EuropeanAqi.Count == 0)
         {

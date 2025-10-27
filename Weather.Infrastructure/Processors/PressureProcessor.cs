@@ -1,18 +1,17 @@
-using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Application.Processors;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Infrastructure;
+namespace Weather.Infrastructure.Processors;
 
 public class PressureProcessor : IPressureProcessor
 {
-    public PressureDetails Process(OpenMeteoWeatherDailyForecastResponse raw)
+    public PressureDetails Process(ForecastData raw)
     {
-        if (raw?.WeatherDaily?.SurfacePressureMean == null || raw.WeatherDaily.SurfacePressureMean.Count == 0)
+        if (raw?.Daily?.SurfacePressureMean == null || raw.Daily.SurfacePressureMean.Count == 0)
             throw new ArgumentException("surface_pressure_mean is missing in Open-Meteo response.");
         
-        double? surfacePressureMeanOptional = raw.WeatherDaily.SurfacePressureMean.FirstOrDefault();
+        double? surfacePressureMeanOptional = raw.Daily.SurfacePressureMean.FirstOrDefault();
         
         if (!surfacePressureMeanOptional.HasValue)
             throw new ArgumentException("surface_pressure_mean[0] is null.");

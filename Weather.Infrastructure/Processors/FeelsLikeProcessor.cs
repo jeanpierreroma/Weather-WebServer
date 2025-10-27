@@ -1,29 +1,28 @@
-using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Application.Processors;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Infrastructure;
+namespace Weather.Infrastructure.Processors;
 
 public class FeelsLikeProcessor : IFeelsLikeProcessor
 {
-    public FeelsLikeDetails Process(OpenMeteoWeatherDailyForecastResponse raw)
+    public FeelsLikeDetails Process(ForecastData raw)
     {
-        if (raw.WeatherDaily.ApparentTemperatureMean == null || raw.WeatherDaily.ApparentTemperatureMean.Count == 0)
+        if (raw.Daily.ApparentTemperatureMean == null || raw.Daily.ApparentTemperatureMean.Count == 0)
         {
             throw new ArgumentException("apparent_temperature_mean is missing in Open-Meteo response.");
         }
-        if (raw.WeatherDaily.TemperatureMean == null || raw.WeatherDaily.TemperatureMean.Count == 0)
+        if (raw.Daily.TemperatureMean == null || raw.Daily.TemperatureMean.Count == 0)
         {
             throw new ArgumentException("temperature_2m_mean is missing in Open-Meteo response.");
         }
         
-        double? temperatureMeanOptional = raw.WeatherDaily.TemperatureMean.FirstOrDefault();
+        double? temperatureMeanOptional = raw.Daily.TemperatureMean.FirstOrDefault();
         
         if (!temperatureMeanOptional.HasValue)
             throw new ArgumentException("temperature_2m_mean[0] is null.");
         
-        double? apparentTemperatureOptional = raw.WeatherDaily.ApparentTemperatureMean.FirstOrDefault();
+        double? apparentTemperatureOptional = raw.Daily.ApparentTemperatureMean.FirstOrDefault();
         
         if (!apparentTemperatureOptional.HasValue)
             throw new ArgumentException("apparent_temperature_mean[0] is null.");

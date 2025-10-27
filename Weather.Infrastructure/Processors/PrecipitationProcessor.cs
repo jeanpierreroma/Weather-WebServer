@@ -1,18 +1,17 @@
-using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Application.Processors;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Infrastructure;
+namespace Weather.Infrastructure.Processors;
 
 public class PrecipitationProcessor : IPrecipitationProcessor
 {
-    public PrecipitationDetails Process(OpenMeteoWeatherDailyForecastResponse raw)
+    public PrecipitationDetails Process(ForecastData raw)
     {
-        if (raw?.WeatherDaily?.PrecipitationSum == null || raw.WeatherDaily.PrecipitationSum.Count == 0)
+        if (raw?.Daily?.PrecipitationSum == null || raw.Daily.PrecipitationSum.Count == 0)
             throw new ArgumentException("precipitation_sum is missing in Open-Meteo response.");
         
-        double? precipitationSumOptional = raw.WeatherDaily.PrecipitationSum.FirstOrDefault();
+        double? precipitationSumOptional = raw.Daily.PrecipitationSum.FirstOrDefault();
         
         if (!precipitationSumOptional.HasValue)
             throw new ArgumentException("precipitation_sum[0] is null.");

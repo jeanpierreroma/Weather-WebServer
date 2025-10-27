@@ -1,18 +1,17 @@
-using Weather.Application;
 using Weather.Application.DTOs;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
 using Weather.Application.Processors;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Infrastructure;
+namespace Weather.Infrastructure.Processors;
 
 public class HumidityProcessor : IHumidityProcessor
 {
-    public HumidityDetails Process(OpenMeteoWeatherDailyForecastResponse raw)
+    public HumidityDetails Process(ForecastData raw)
     {
-        if (raw?.WeatherDaily?.RelativeHumidityMean == null || raw.WeatherDaily.RelativeHumidityMean.Count == 0)
+        if (raw?.Daily?.RelativeHumidityMean == null || raw.Daily.RelativeHumidityMean.Count == 0)
             throw new ArgumentException("relative_humidity_2m_mean is missing in Open-Meteo response.");
         
-        int? humidityOptional = raw.WeatherDaily.RelativeHumidityMean.FirstOrDefault();
+        int? humidityOptional = raw.Daily.RelativeHumidityMean.FirstOrDefault();
         
         if (!humidityOptional.HasValue)
             throw new ArgumentException("relative_humidity_2m_mean[0] is null.");

@@ -1,7 +1,12 @@
 using Microsoft.OpenApi.Models;
 using Weather.Application;
-using Weather.Application.DTOs;
+using Weather.Application.Abstraction;
+using Weather.Application.Aggregations;
+using Weather.Application.Processors;
+using Weather.Application.Services;
 using Weather.Infrastructure;
+using Weather.Infrastructure.OpenMeteo;
+using Weather.Infrastructure.Processors;
 
 namespace Weather.Api;
 
@@ -42,8 +47,6 @@ public static class StartupHelperExtension
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("WeatherApp/1.0");
         });
 
-        builder.Services.AddScoped<IOpenMeteoClient, OpenMeteoClient>();
-
         builder.Services.AddScoped<IAirQualityProcessor, AirQualityProcessor>();
         builder.Services.AddScoped<IFeelsLikeProcessor, FeelsLikeProcessor>();
         builder.Services.AddScoped<IHumidityProcessor, HumidityProcessor>();
@@ -51,10 +54,11 @@ public static class StartupHelperExtension
         builder.Services.AddScoped<IPressureProcessor, PressureProcessor>();
         builder.Services.AddScoped<IUvProcessor, UvProcessor>();
         builder.Services.AddScoped<IVisibilityProcessor, VisibilityProcessor>();
-
-        builder.Services.AddScoped<IDailySectionsAggregator, DailySectionsAggregator>();
         
+        builder.Services.AddScoped<IForecastAggregator, ForecastAggregator>();
         builder.Services.AddScoped<IWeatherService, WeatherService>();
+        
+        builder.Services.AddScoped<IForecastProvider, OpenMeteoClient>();
         
         return builder.Build();
     }

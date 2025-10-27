@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Weather.Application;
-using Weather.Application.OpenMeteoDTOs.AirQuality.Hourly;
-using Weather.Application.OpenMeteoDTOs.Weather.Daily;
+using Weather.Application.Abstraction;
+using Weather.Application.DTOs;
+using Weather.Application.Services;
 
 namespace Weather.Api.Controllers;
 
@@ -17,10 +18,14 @@ public class WeatherForecastController : ControllerBase
     public async Task<IActionResult> GetDailyWeather(
         [FromQuery] double latitude = 52.52,
         [FromQuery] double longitude = 13.41,
-        CancellationToken ct = default
+        CancellationToken cancellationToken = default
     )
     {
-        var dto = await _service.GetDailyForecastAsync(latitude, longitude, ct);
+        var dto = await _service.GetDailyForecastAsync(
+            new Coordinates(latitude, longitude), 
+            new ForecastOptions(),
+            cancellationToken
+        );
 
         return dto is null ? StatusCode(502, new { error = "Open-Meteo request failed" }) : Ok(dto);
     }

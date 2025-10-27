@@ -1,11 +1,10 @@
 using Weather.Application.DTOs;
 using Weather.Application.DTOs.ForecastSettings;
-using Weather.Infrastructure.OpenMeteo.Mappers;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Settings;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs;
+namespace Weather.Infrastructure.OpenMeteo.Mappers;
 
 public static class OpenMeteoMapper
 {

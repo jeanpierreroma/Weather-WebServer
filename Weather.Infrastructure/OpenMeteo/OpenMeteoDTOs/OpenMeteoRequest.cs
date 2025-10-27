@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using Weather.Domain.OpenMeteoDTOs.Settings;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Settings;
 
-namespace Weather.Domain.OpenMeteoDTOs;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs;
 
 public abstract class OpenMeteoRequest
 {

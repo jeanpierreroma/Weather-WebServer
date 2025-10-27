@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
 
 public class OpenMeteoAirQualityHourlyUnits
 {

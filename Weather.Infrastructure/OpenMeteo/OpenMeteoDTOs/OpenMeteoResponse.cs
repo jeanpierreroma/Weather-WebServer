@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Domain.OpenMeteoDTOs;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs;
 
 public abstract class OpenMeteoResponse
 {

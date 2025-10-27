@@ -1,6 +1,6 @@
-using Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
 
-namespace Weather.Application.Mappers;
+namespace Weather.Infrastructure.OpenMeteo.Mappers;
 
 public static class AirQualityHourlyFieldMap
 {

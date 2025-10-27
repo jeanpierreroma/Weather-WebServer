@@ -1,4 +1,4 @@
-namespace Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
 
 public enum AirQualityHourlyField
 {

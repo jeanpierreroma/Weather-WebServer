@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Domain.OpenMeteoDTOs.Settings;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Settings;
 
-public abstract class OpenMeteoSettings
+public class OpenMeteoSettings
 {
     [JsonPropertyName("temperature_unit")] 
     public string TemperatureUnit { get; init; } = null!;

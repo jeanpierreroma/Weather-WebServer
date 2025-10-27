@@ -1,6 +1,6 @@
-using Weather.Domain.OpenMeteoDTOs.Weather.Daily;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Application.Mappers;
+namespace Weather.Infrastructure.OpenMeteo.Mappers;
 
 public static class WeatherDailyFieldMap
 {

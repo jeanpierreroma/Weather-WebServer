@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
 
 public class OpenMeteoAirQualityHourlyRequest : OpenMeteoRequest
 {
-    [JsonIgnore]
+    [JsonPropertyName("hourly")]
     public IReadOnlyList<string>? Hourly { get; init; }
 }

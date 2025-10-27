@@ -1,6 +1,7 @@
-using Weather.Domain.OpenMeteoDTOs.Settings;
+using Weather.Application.DTOs.ForecastSettings;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Settings;
 
-namespace Weather.Application.Mappers;
+namespace Weather.Infrastructure.OpenMeteo.Mappers;
 
 public static class UnitsMap
 {

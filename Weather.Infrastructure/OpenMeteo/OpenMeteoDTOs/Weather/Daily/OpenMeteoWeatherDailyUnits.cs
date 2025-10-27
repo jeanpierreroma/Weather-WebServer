@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Weather.Domain.OpenMeteoDTOs.Weather.Daily;
+namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
 public sealed class OpenMeteoWeatherDailyUnits
 {

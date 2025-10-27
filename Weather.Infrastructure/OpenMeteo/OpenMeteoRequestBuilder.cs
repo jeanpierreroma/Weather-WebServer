@@ -1,9 +1,9 @@
-using Weather.Application.Mappers;
-using Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
-using Weather.Domain.OpenMeteoDTOs.Settings;
-using Weather.Domain.OpenMeteoDTOs.Weather.Daily;
+using Weather.Application.DTOs.ForecastSettings;
+using Weather.Infrastructure.OpenMeteo.Mappers;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-namespace Weather.Application.Networking;
+namespace Weather.Infrastructure.OpenMeteo;
 
 public static class OpenMeteoRequestBuilder
 {
@@ -12,7 +12,7 @@ public static class OpenMeteoRequestBuilder
         double longitude,
         int forecastDays = 1,
         string timezone = "auto",
-        OpenMeteoSettings? settings = null,
+        ForecastSetting? settings = null,
         params WeatherDailyField[] dailyFields
     )
     {
@@ -25,6 +25,10 @@ public static class OpenMeteoRequestBuilder
             .Select(f => f.ToApi())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
+        
+        var openMeteoSettings = settings is null
+            ? null
+            : OpenMeteoMapper.MapForecastOptionsToOpenMeteoSettings(settings);
 
         return new OpenMeteoWeatherDailyForecastRequest
         {
@@ -32,7 +36,7 @@ public static class OpenMeteoRequestBuilder
             Longitude = longitude,
             ForecastDays = forecastDays,
             Timezone = timezone,
-            Settings = settings,
+            Settings = openMeteoSettings,
 
             Daily = daily
         };
@@ -43,7 +47,7 @@ public static class OpenMeteoRequestBuilder
         double longitude,
         int forecastDays = 1,
         string timezone = "auto",
-        OpenMeteoSettings? settings = null,
+        ForecastSetting? settings = null,
         params AirQualityHourlyField[] hourlyFields
     )
     {
@@ -56,6 +60,10 @@ public static class OpenMeteoRequestBuilder
             .Select(f => f.ToApi())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
+        
+        var openMeteoSettings = settings is null
+            ? null
+            : OpenMeteoMapper.MapForecastOptionsToOpenMeteoSettings(settings);
 
         return new OpenMeteoAirQualityHourlyRequest
         {
@@ -63,7 +71,7 @@ public static class OpenMeteoRequestBuilder
             Longitude = longitude,
             ForecastDays = forecastDays,
             Timezone = timezone,
-            Settings = settings,
+            Settings = openMeteoSettings,
 
             Hourly = horuly
         };

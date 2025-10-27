@@ -1,74 +1,52 @@
-using Weather.Application;
 using Weather.Application.Abstraction;
-using Weather.Application.Aggregations;
-using Weather.Application.Processors;
-using Weather.Application.Processors.HourlyProcessors;
-using Weather.Application.Services;
-using Weather.Domain.DTOs;
-using Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
-using Weather.Domain.OpenMeteoDTOs.Weather.Daily;
+using Weather.Application.DTOs;
 
-namespace Weather.Infrastructure;
+namespace Weather.Application.Services;
 
 public class WeatherService: IWeatherService
 {
-    private readonly IWeatherProvider _client;
-    private readonly IAirQualityProcessor _airQualityProcessor;
-    private readonly IDailySectionsAggregator _dailyAggregator;
+    private readonly IForecastProvider _client;
+    private readonly IForecastAggregator _dailyAggregator;
     
     public WeatherService(
-        IWeatherProvider client, 
-        IAirQualityProcessor airQualityProcessor, 
-        IDailySectionsAggregator dailyAggregator)
+        IForecastProvider client, 
+        IForecastAggregator dailyAggregator)
     {
         _client = client;
-        _airQualityProcessor = airQualityProcessor;
         _dailyAggregator = dailyAggregator;
     }    
     
-    public async Task<DailyForecast?> GetDailyForecastAsync(double latitude, double longitude, CancellationToken ct)
+    public async Task<DailyForecast?> GetDailyForecastAsync(Coordinates coordinates, ForecastOptions options, CancellationToken cancellationToken)
     {
-        Task<OpenMeteoWeatherDailyForecastResponse?> weatherDailyForecastTask = _client.GetDailyForecast(
-            latitude: latitude,
-            longitude: longitude,
-            ct: ct
+        ForecastData? weatherForecastResponse = await _client.GetDailyForecast(
+            coordinates: coordinates,
+            options: options,
+            cancellationToken: cancellationToken
         );
         
-        Task<OpenMeteoAirQualityHourlyResponse?> airQualityHourlyTask = _client.GetHourlyAirQuality(
-            latitude: latitude,
-            longitude: longitude,
-            ct: ct
-        );
+        if (weatherForecastResponse is null) return null;
         
-        await Task.WhenAll(weatherDailyForecastTask, airQualityHourlyTask);
-        
-        OpenMeteoWeatherDailyForecastResponse? weatherDailyForecastResponse = weatherDailyForecastTask.Result;
-        OpenMeteoAirQualityHourlyResponse? airQualityHourlyResponse = airQualityHourlyTask.Result;
-        
-        if (weatherDailyForecastResponse is null || airQualityHourlyResponse is null) return null;
-        
-        AirQualityDetails airQualitySection = _airQualityProcessor.Process(airQualityHourlyResponse);
-        ProcessedDailySections dailySections = await _dailyAggregator.ProcessAsync(weatherDailyForecastResponse, ct);
+        ProcessedForecastSections forecastSections = await _dailyAggregator.Aggregate(weatherForecastResponse, cancellationToken);
         
         return new DailyForecast
         {
-            AirQualityDetails = airQualitySection,
-            FeelsLikeDetails = dailySections.FeelsLike,
-            HumidityDetails = dailySections.Humidity,
-            PrecipitationDetails = dailySections.Precipitation,
-            PressureDetails = dailySections.Pressure,
+            AirQualityDetails = forecastSections.AirQuality,
+            FeelsLikeDetails = forecastSections.FeelsLike,
+            HumidityDetails = forecastSections.Humidity,
+            PrecipitationDetails = forecastSections.Precipitation,
+            PressureDetails = forecastSections.Pressure,
             SunDetails = new SunDetails
             {
-                SunriseText = weatherDailyForecastResponse.WeatherDaily.Sunrise.FirstOrDefault() ?? string.Empty,
-                SunsetText = weatherDailyForecastResponse.WeatherDaily.Sunset.FirstOrDefault() ?? string.Empty,
+                SunriseText = weatherForecastResponse.Daily.Sunrise.FirstOrDefault() ?? string.Empty,
+                SunsetText = weatherForecastResponse.Daily.Sunset.FirstOrDefault() ?? string.Empty,
             },
-            UvDetails = dailySections.Uv,
-            VisibilityDetails = dailySections.Visibility,
+            UvDetails = forecastSections.Uv,
+            VisibilityDetails = forecastSections.Visibility,
             WindDetails = new WindDetails
             {
-                WindSpeedMps = weatherDailyForecastResponse.WeatherDaily.WindSpeedMean?.FirstOrDefault() ?? 0,
-                GustSpeedMps = weatherDailyForecastResponse.WeatherDaily.WindGustsMean?.FirstOrDefault() ?? 0,
-                DirectionDegrees = weatherDailyForecastResponse.WeatherDaily.WindDirectionDominant?.FirstOrDefault() ?? 0
+                WindSpeedMps = weatherForecastResponse.Daily.WindSpeedMean?.FirstOrDefault() ?? 0,
+                GustSpeedMps = weatherForecastResponse.Daily.WindGustsMean?.FirstOrDefault() ?? 0,
+                DirectionDegrees = weatherForecastResponse.Daily.WindDirectionDominant?.FirstOrDefault() ?? 0
             }
         };
     }

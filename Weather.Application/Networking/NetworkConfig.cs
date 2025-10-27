@@ -1,4 +1,4 @@
-namespace Weather.Application.Core;
+namespace Weather.Application.Networking;
 
 public static class NetworkConfig
 {

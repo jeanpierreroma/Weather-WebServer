@@ -2,7 +2,7 @@ using Weather.Application.DTOs;
 
 namespace Weather.Application.Abstraction;
 
-public interface IWeatherAggregator
+public interface IForecastAggregator
 {
-    Task<ProcessedDailySections> ProcessAsync(ForecastData forecastData, CancellationToken ct);
+    Task<ProcessedForecastSections> Aggregate(ForecastData forecastData, CancellationToken cancellationToken = default);
 }

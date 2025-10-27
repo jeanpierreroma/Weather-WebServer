@@ -1,6 +1,4 @@
-using IHttpClientFactory = Weather.Application.Networking.IHttpClientFactory;
-
-namespace Weather.Infrastructure;
+namespace Weather.Application.Networking;
 
 public abstract class NetworkServiceBase(IHttpClientFactory httpClientFactory) : IDisposable
 {

@@ -2,7 +2,7 @@ using Weather.Application.DTOs;
 
 namespace Weather.Application.Processors;
 
-public interface IDailyProcessor<out TOut>
+public interface IForecastProcessor<out TOut>
     : IProcessor<ForecastData, TOut>
 {
     

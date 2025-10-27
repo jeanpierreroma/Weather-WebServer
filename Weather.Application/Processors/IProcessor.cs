@@ -1,4 +1,4 @@
-namespace Weather.Application.Abstraction;
+namespace Weather.Application.Processors;
 
 public interface IProcessor<in TIn, out TOut>
 {

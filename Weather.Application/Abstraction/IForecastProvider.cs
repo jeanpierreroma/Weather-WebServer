@@ -1,28 +1,12 @@
-using Weather.Domain.OpenMeteoDTOs.AirQuality.Hourly;
-using Weather.Domain.OpenMeteoDTOs.Settings;
-using Weather.Domain.OpenMeteoDTOs.Weather.Daily;
+using Weather.Application.DTOs;
 
 namespace Weather.Application.Abstraction;
 
-public interface IWeatherProvider
+public interface IForecastProvider
 {
-    Task<OpenMeteoWeatherDailyForecastResponse?> GetDailyForecast(
-        double latitude,
-        double longitude,
-        CancellationToken ct,
-        int forecastDays = 1,
-        string timezone = "auto",
-        OpenMeteoSettings? settings = null,
-        params WeatherDailyField[] dailyFields
-    );
-
-    Task<OpenMeteoAirQualityHourlyResponse?> GetHourlyAirQuality(
-        double latitude,
-        double longitude,
-        CancellationToken ct,
-        int forecastDays = 1,
-        string timezone = "auto",
-        OpenMeteoSettings? settings = null,
-        params AirQualityHourlyField[] hourlyFields
+    Task<ForecastData?> GetDailyForecast(
+        Coordinates coordinates,
+        ForecastOptions options,
+        CancellationToken cancellationToken = default
     );
 }

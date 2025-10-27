@@ -1,12 +1,12 @@
-using Weather.Domain.DTOs;
+using Weather.Application.DTOs;
 
-namespace Weather.Application.Services;
+namespace Weather.Application.Abstraction;
 
 public interface IWeatherService
 {
     Task<DailyForecast?> GetDailyForecastAsync(
-        double latitude,
-        double longitude,
+        Coordinates coordinates,
+        ForecastOptions options,
         CancellationToken ct
     );
 }

@@ -4,7 +4,7 @@ using Weather.Application.Processors;
 
 namespace Weather.Application.Aggregations;
 
-public sealed class WeatherAggregator : IWeatherAggregator
+public sealed class ForecastAggregator : IForecastAggregator
 {
     private readonly IAirQualityProcessor _airQualityProcessor;
     private readonly IFeelsLikeProcessor _feelsLike;
@@ -14,7 +14,7 @@ public sealed class WeatherAggregator : IWeatherAggregator
     private readonly IUvProcessor _uv;
     private readonly IVisibilityProcessor _visibility;
 
-    public WeatherAggregator(
+    public ForecastAggregator(
         IAirQualityProcessor airQualityProcessor,
         IFeelsLikeProcessor feelsLike,
         IHumidityProcessor humidity,
@@ -32,7 +32,7 @@ public sealed class WeatherAggregator : IWeatherAggregator
         _visibility = visibility;
     }
 
-    public async Task<ProcessedDailySections> ProcessAsync(ForecastData raw, CancellationToken ct)
+    public async Task<ProcessedForecastSections> Aggregate(ForecastData raw, CancellationToken ct)
     {
         var airQualityTask    = Task.Run(() => _airQualityProcessor.Process(raw), ct);
         var feelsLikeTask     = Task.Run(() => _feelsLike.Process(raw), ct);
@@ -44,7 +44,7 @@ public sealed class WeatherAggregator : IWeatherAggregator
 
         await Task.WhenAll(feelsLikeTask, humidityTask, precipitationTask, pressureTask, uvTask, visibilityTask);
 
-        return new ProcessedDailySections(
+        return new ProcessedForecastSections(
             airQualityTask.Result,
             feelsLikeTask.Result,
             humidityTask.Result,

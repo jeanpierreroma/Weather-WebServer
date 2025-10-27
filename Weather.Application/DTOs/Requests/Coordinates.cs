@@ -1,3 +1,3 @@
-namespace Weather.Application.DTOs;
+namespace Weather.Application.DTOs.Requests;
 
 public record Coordinates(double Latitude, double Longitude);

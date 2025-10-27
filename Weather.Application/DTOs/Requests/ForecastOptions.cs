@@ -1,6 +1,6 @@
 using Weather.Application.DTOs.ForecastSettings;
 
-namespace Weather.Application.DTOs;
+namespace Weather.Application.DTOs.Requests;
 
 public record ForecastOptions(int ForecastDays, string Timezone, ForecastSetting Settings)
 {

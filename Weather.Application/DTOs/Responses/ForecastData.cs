@@ -1,4 +1,4 @@
-namespace Weather.Application.DTOs;
+namespace Weather.Application.DTOs.Responses;
 
 public record ForecastData(
     Daily Daily,

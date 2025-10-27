@@ -1,4 +1,6 @@
-namespace Weather.Application.DTOs;
+using Weather.Application.DTOs.Responses.Details;
+
+namespace Weather.Application.DTOs.Responses;
 
 public class DailyForecast
 {

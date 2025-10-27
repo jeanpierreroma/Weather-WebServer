@@ -1,4 +1,4 @@
-namespace Weather.Application.DTOs;
+namespace Weather.Application.DTOs.Responses.Details;
 
 public class FeelsLikeDetails
 {

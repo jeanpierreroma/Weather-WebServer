@@ -3,6 +3,7 @@ using Weather.Application;
 using Weather.Application.Abstraction;
 using Weather.Application.DTOs;
 using Weather.Application.DTOs.Requests;
+using Weather.Application.DTOs.Responses;
 using Weather.Application.Services;
 
 namespace Weather.Api.Controllers;
@@ -22,12 +23,29 @@ public class WeatherForecastController : ControllerBase
         CancellationToken cancellationToken = default
     )
     {
-        var dto = await _service.GetDailyForecastAsync(
+        DailyForecast? dailyForecast = await _service.GetDailyForecastAsync(
             new Coordinates(latitude, longitude), 
             new ForecastOptions(),
             cancellationToken
         );
 
-        return dto is null ? StatusCode(502, new { error = "Open-Meteo request failed" }) : Ok(dto);
+        HourlyForecast? hourlyForecast = await _service.GetHourlyForecastAsync(
+            new Coordinates(latitude, longitude), 
+            new ForecastOptions(),
+            cancellationToken
+        );
+
+        if (dailyForecast is null || hourlyForecast is null)
+        {
+            return StatusCode(502, new { error = "Open-Meteo request failed" });
+        }
+        
+        ForecastResponse response = new ForecastResponse
+        {
+            Daily = dailyForecast,
+            Hourly = hourlyForecast
+        };
+
+        return Ok(response);
     }
 }

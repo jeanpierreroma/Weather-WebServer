@@ -61,6 +61,7 @@ public static class StartupHelperExtension
         builder.Services.AddScoped<IPressureProcessor, PressureProcessor>();
         builder.Services.AddScoped<IUvProcessor, UvProcessor>();
         builder.Services.AddScoped<IVisibilityProcessor, VisibilityProcessor>();
+        builder.Services.AddScoped<IMoonProcessor, MoonProcessor>();
         
         builder.Services.AddScoped<IForecastAggregator, ForecastAggregator>();
         builder.Services.AddScoped<IWeatherService, WeatherService>();

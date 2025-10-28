@@ -33,14 +33,19 @@ public class WeatherService: IWeatherService
         
         if (weatherForecastResponse is null) return null;
         
-        var moonSnapshot = await _moonClient.GetMoon(
+        MoonSnapshotDto? moonSnapshot = await _moonClient.GetMoon(
             dateTime: DateTime.UtcNow,
             cancellationToken: cancellationToken
         );
-        
+
+        weatherForecastResponse = weatherForecastResponse with
+        {
+            Daily = weatherForecastResponse.Daily with { MoonSnapshot = moonSnapshot }
+        };
+
         ProcessedForecastSections forecastSections = await _dailyAggregator.Aggregate(weatherForecastResponse, cancellationToken);
         
-        return new DailyForecast
+        DailyForecast dailyForecast = new DailyForecast
         {
             AirQualityDetails = forecastSections.AirQuality,
             FeelsLikeDetails = forecastSections.FeelsLike,
@@ -54,6 +59,7 @@ public class WeatherService: IWeatherService
             },
             UvDetails = forecastSections.Uv,
             VisibilityDetails = forecastSections.Visibility,
+            MoonDetails = forecastSections.Moon,
             WindDetails = new WindDetails
             {
                 WindSpeedMps = weatherForecastResponse.Daily.WindSpeedMean?.FirstOrDefault() ?? 0,
@@ -61,5 +67,50 @@ public class WeatherService: IWeatherService
                 DirectionDegrees = weatherForecastResponse.Daily.WindDirectionDominant?.FirstOrDefault() ?? 0
             }
         };
+
+        return dailyForecast;
+    }
+
+    public async Task<HourlyForecast?> GetHourlyForecastAsync(Coordinates coordinates, ForecastOptions options, CancellationToken cancellationToken)
+    {
+        ForecastData? weatherForecastResponse = await _forecastClient.GetDailyForecast(
+            coordinates: coordinates,
+            options: options,
+            cancellationToken: cancellationToken
+        );
+        
+        if (weatherForecastResponse is null) return null;
+        
+        HourlyForecast hourlyForecast = new HourlyForecast
+        {
+            Temperature = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.Temperature),
+            ApparentTemperature = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.ApparentTemperature),
+            UvIndex = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.UvIndex),
+            Precipitation = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.Precipitation),
+            Visibility = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.Visibility),
+            WindDirection = ToHourPoints<int>(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.WindDirection),
+            WindGusts = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.WindGusts),
+            WindSpeed = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.WindSpeed),
+            RelativeHumidity = ToHourPoints<int>(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.RelativeHumidity),
+            SurfacePressure = ToHourPoints(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.SurfacePressure),
+            EuropeanAqi = ToHourPoints<int>(weatherForecastResponse.Hourly.Time, weatherForecastResponse.Hourly.EuropeanAqi),
+        };
+
+        return hourlyForecast;
+    }
+    
+    private static IReadOnlyList<HourPoint<T>> ToHourPoints<T>(
+        IReadOnlyList<DateTime>? time,
+        IReadOnlyList<T>? values)
+    {
+        if (time is null || values is null) return [];
+
+        int n = Math.Min(time.Count, values.Count);
+        var list = new List<HourPoint<T>>(n);
+        for (int i = 0; i < n; i++)
+        {
+            list.Add(new HourPoint<T>(time[i], values[i]));
+        }
+        return list;
     }
 }

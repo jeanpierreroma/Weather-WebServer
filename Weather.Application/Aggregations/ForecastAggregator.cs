@@ -15,6 +15,7 @@ public sealed class ForecastAggregator : IForecastAggregator
     private readonly IPressureProcessor _pressure;
     private readonly IUvProcessor _uv;
     private readonly IVisibilityProcessor _visibility;
+    private readonly IMoonProcessor _moon;
 
     public ForecastAggregator(
         IAirQualityProcessor airQualityProcessor,
@@ -23,7 +24,8 @@ public sealed class ForecastAggregator : IForecastAggregator
         IPrecipitationProcessor precipitation,
         IPressureProcessor pressure,
         IUvProcessor uv,
-        IVisibilityProcessor visibility)
+        IVisibilityProcessor visibility, 
+        IMoonProcessor moon)
     {
         _airQualityProcessor = airQualityProcessor;
         _feelsLike = feelsLike;
@@ -32,6 +34,7 @@ public sealed class ForecastAggregator : IForecastAggregator
         _pressure = pressure;
         _uv = uv;
         _visibility = visibility;
+        _moon = moon;
     }
 
     public async Task<ProcessedForecastSections> Aggregate(ForecastData raw, CancellationToken ct)
@@ -43,6 +46,7 @@ public sealed class ForecastAggregator : IForecastAggregator
         var pressureTask      = Task.Run(() => _pressure.Process(raw), ct);
         var uvTask            = Task.Run(() => _uv.Process(raw), ct);
         var visibilityTask    = Task.Run(() => _visibility.Process(raw), ct);
+        var moonTask          = Task.Run(() => _moon.Process(raw), ct);
 
         await Task.WhenAll(feelsLikeTask, humidityTask, precipitationTask, pressureTask, uvTask, visibilityTask);
 
@@ -53,7 +57,8 @@ public sealed class ForecastAggregator : IForecastAggregator
             precipitationTask.Result,
             pressureTask.Result,
             uvTask.Result,
-            visibilityTask.Result
+            visibilityTask.Result,
+            moonTask.Result
         );
     }
 }

@@ -11,4 +11,10 @@ public interface IWeatherService
         ForecastOptions options,
         CancellationToken ct
     );
+    
+    Task<HourlyForecast?> GetHourlyForecastAsync(
+        Coordinates coordinates,
+        ForecastOptions options,
+        CancellationToken ct
+    );
 }

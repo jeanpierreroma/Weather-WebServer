@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather;
 
-public class OpenMeteoWeatherDailyForecastRequest : OpenMeteoRequest
+public class OpenMeteoWeatherForecastRequest : OpenMeteoRequest
 {
     [JsonPropertyName("hourly")]
     public IReadOnlyList<string>? Hourly { get; init; }

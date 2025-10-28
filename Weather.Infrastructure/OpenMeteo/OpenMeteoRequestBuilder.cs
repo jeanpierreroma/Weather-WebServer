@@ -1,36 +1,42 @@
 using Weather.Application.DTOs.ForecastSettings;
+using Weather.Application.DTOs.Settings;
 using Weather.Infrastructure.OpenMeteo.Mappers;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Settings;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Hourly;
 
 namespace Weather.Infrastructure.OpenMeteo;
 
 public static class OpenMeteoRequestBuilder
 {
-    public static OpenMeteoWeatherDailyForecastRequest BuildWeatherDailyForecastRequest(
+    public static OpenMeteoWeatherForecastRequest BuildWeatherDailyForecastRequest(
         double latitude,
         double longitude,
         int forecastDays = 1,
         string timezone = "auto",
-        ForecastSetting? settings = null,
-        params WeatherDailyField[] dailyFields
+        ForecastSetting? settings = null
     )
     {
-        // Якщо користувач не передав поля — беремо ВСІ з enum
-        WeatherDailyField[] effectiveFields = dailyFields is { Length: > 0 }
-            ? dailyFields
-            : Enum.GetValues<WeatherDailyField>();
+        OpenMeteoWeatherDailyFields[] dailyFields = Enum.GetValues<OpenMeteoWeatherDailyFields>();
+        OpenMeteoWeatherHourlyFields[] hourlyFields = Enum.GetValues<OpenMeteoWeatherHourlyFields>();
         
-        string[] daily = effectiveFields
+        string[] daily = dailyFields
             .Select(f => f.ToApi())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
         
-        var openMeteoSettings = settings is null
+        string[] hourly = hourlyFields
+            .Select(f => f.ToApi())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        
+        OpenMeteoSettings? openMeteoSettings = settings is null
             ? null
             : OpenMeteoMapper.MapForecastOptionsToOpenMeteoSettings(settings);
 
-        return new OpenMeteoWeatherDailyForecastRequest
+        return new OpenMeteoWeatherForecastRequest
         {
             Latitude = latitude,
             Longitude = longitude,
@@ -38,7 +44,8 @@ public static class OpenMeteoRequestBuilder
             Timezone = timezone,
             Settings = openMeteoSettings,
 
-            Daily = daily
+            Daily = daily,
+            Hourly = hourly
         };
     }
     
@@ -47,21 +54,17 @@ public static class OpenMeteoRequestBuilder
         double longitude,
         int forecastDays = 1,
         string timezone = "auto",
-        ForecastSetting? settings = null,
-        params AirQualityHourlyField[] hourlyFields
+        ForecastSetting? settings = null
     )
     {
-        // Якщо користувач не передав поля — беремо ВСІ з enum
-        AirQualityHourlyField[] effectiveFields = hourlyFields is { Length: > 0 }
-            ? hourlyFields
-            : Enum.GetValues<AirQualityHourlyField>();
+        AirQualityHourlyField[] effectiveFields = Enum.GetValues<AirQualityHourlyField>();
         
         string[] horuly = effectiveFields
             .Select(f => f.ToApi())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
         
-        var openMeteoSettings = settings is null
+        OpenMeteoSettings? openMeteoSettings = settings is null
             ? null
             : OpenMeteoMapper.MapForecastOptionsToOpenMeteoSettings(settings);
 

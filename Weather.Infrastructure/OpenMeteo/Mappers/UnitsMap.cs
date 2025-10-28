@@ -1,4 +1,5 @@
 using Weather.Application.DTOs.ForecastSettings;
+using Weather.Application.DTOs.Settings;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Settings;
 
 namespace Weather.Infrastructure.OpenMeteo.Mappers;

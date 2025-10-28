@@ -6,6 +6,7 @@ using Weather.Application.DTOs.Responses;
 using Weather.Application.Networking;
 using Weather.Infrastructure.OpenMeteo.Mappers;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.AirQuality.Hourly;
+using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather;
 using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
 namespace Weather.Infrastructure.OpenMeteo;
@@ -17,7 +18,7 @@ public sealed class OpenMeteoClient(IHttpClientFactory httpClientFactory)
     
     public async Task<ForecastData?> GetDailyForecast(Coordinates coordinates, ForecastOptions options, CancellationToken cancellationToken = default)
     {
-        OpenMeteoWeatherDailyForecastRequest weatherDailyForecastRequest = OpenMeteoRequestBuilder.BuildWeatherDailyForecastRequest(
+        OpenMeteoWeatherForecastRequest weatherForecastRequest = OpenMeteoRequestBuilder.BuildWeatherDailyForecastRequest(
             coordinates.Latitude,
             coordinates.Longitude,
             options.ForecastDays,
@@ -32,13 +33,15 @@ public sealed class OpenMeteoClient(IHttpClientFactory httpClientFactory)
             options.Timezone,
             options.Settings
         );
-        
-        Task<OpenMeteoWeatherDailyForecastResponse?> weatherDailyForecastRequestTask = PerformFetchingWeatherDailyForecast(weatherDailyForecastRequest, cancellationToken);
-        Task<OpenMeteoAirQualityHourlyResponse?> airQualityHourlyRequestTask = PerformFetchingAirQualityHourlyRequest(airQualityHourlyRequest, cancellationToken);
 
-        await Task.WhenAll(weatherDailyForecastRequestTask, airQualityHourlyRequestTask);
+        Task<OpenMeteoWeatherForecastResponse?> weatherForecastRequestTask =
+            PerformFetchingWeatherDailyForecast(weatherForecastRequest, cancellationToken);
+        Task<OpenMeteoAirQualityHourlyResponse?> airQualityHourlyRequestTask =
+            PerformFetchingAirQualityHourlyRequest(airQualityHourlyRequest, cancellationToken);
 
-        OpenMeteoWeatherDailyForecastResponse? weatherDailyForecastResponse = await weatherDailyForecastRequestTask;
+        await Task.WhenAll(weatherForecastRequestTask, airQualityHourlyRequestTask);
+
+        OpenMeteoWeatherForecastResponse? weatherDailyForecastResponse = await weatherForecastRequestTask;
         OpenMeteoAirQualityHourlyResponse? airQualityHourlyResponse = await airQualityHourlyRequestTask;
 
         if (weatherDailyForecastResponse is null || airQualityHourlyResponse is null)
@@ -46,14 +49,16 @@ public sealed class OpenMeteoClient(IHttpClientFactory httpClientFactory)
             return null;
         }
         
-        var daily = OpenMeteoMapper.MapOpenMeteoWeatherDailyForecastResponseToDaily(weatherDailyForecastResponse);
-        var hourly = OpenMeteoMapper.MapOpenMeteoAirQualityHourlyResponseToHourly(airQualityHourlyResponse);
+        Daily daily = OpenMeteoMapper.MapOpenMeteoWeatherDailyForecastResponseToDaily(weatherDailyForecastResponse);
+        Hourly hourly =
+            OpenMeteoMapper.MapOpenMeteoAirQualityHourlyResponseToHourly(airQualityHourlyResponse,
+                weatherDailyForecastResponse);
         
-        return new ForecastData(daily, hourly);
+        return new ForecastData(DateTime.Now, daily, hourly);
     }
     
-    private async Task<OpenMeteoWeatherDailyForecastResponse?> PerformFetchingWeatherDailyForecast(
-        OpenMeteoWeatherDailyForecastRequest request, CancellationToken cancellationToken)
+    private async Task<OpenMeteoWeatherForecastResponse?> PerformFetchingWeatherDailyForecast(
+        OpenMeteoWeatherForecastRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -63,7 +68,7 @@ public sealed class OpenMeteoClient(IHttpClientFactory httpClientFactory)
             response.EnsureSuccessStatusCode();
             
             await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return await JsonSerializer.DeserializeAsync<OpenMeteoWeatherDailyForecastResponse>(stream, JsonOptions,
+            return await JsonSerializer.DeserializeAsync<OpenMeteoWeatherForecastResponse>(stream, JsonOptions,
                 cancellationToken);
         }
         catch (Exception e)

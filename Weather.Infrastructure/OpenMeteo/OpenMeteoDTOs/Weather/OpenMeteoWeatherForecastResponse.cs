@@ -4,7 +4,7 @@ using Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Hourly;
 
 namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather;
 
-public sealed class OpenMeteoWeatherDailyForecastResponse : OpenMeteoResponse
+public sealed class OpenMeteoWeatherForecastResponse : OpenMeteoResponse
 {
     [JsonPropertyName("hourly_units")]
     public OpenMeteoWeatherHourlyUnits WeatherHourlyUnits { get; init; } = new();

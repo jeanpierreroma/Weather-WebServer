@@ -12,6 +12,6 @@ public class DailyForecast
     public SunDetails SunDetails { get; set; } = null!;
     public UvDetails UvDetails { get; init; } = null!;
     public VisibilityDetails VisibilityDetails { get; set; } = null!;
-
+    public MoonDetails MoonDetails { get; set; } = null!;
     public WindDetails WindDetails { get; init; } = null!;
 }

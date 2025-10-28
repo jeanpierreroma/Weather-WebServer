@@ -1,4 +1,6 @@
-namespace Weather.Application.DTOs.ForecastSettings;
+using Weather.Application.DTOs.ForecastSettings;
+
+namespace Weather.Application.DTOs.Settings;
 
 public record ForecastSetting(
     TemperatureUnit TemperatureUnit,

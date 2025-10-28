@@ -9,5 +9,6 @@ public record ProcessedForecastSections(
     PrecipitationDetails Precipitation,
     PressureDetails Pressure,
     UvDetails Uv,
-    VisibilityDetails Visibility
+    VisibilityDetails Visibility,
+    MoonDetails Moon
 );

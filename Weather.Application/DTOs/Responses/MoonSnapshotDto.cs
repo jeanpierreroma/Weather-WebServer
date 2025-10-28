@@ -4,7 +4,6 @@ public class MoonSnapshotDto
 {
     public required string ImageUrl { get; init; }
     public required string Time { get; init; }
-
     public double Phase { get; init; }
     public double Obscuration { get; init; }
     public double Age { get; init; }

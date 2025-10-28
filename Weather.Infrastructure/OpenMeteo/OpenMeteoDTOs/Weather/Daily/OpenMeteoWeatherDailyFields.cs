@@ -1,6 +1,6 @@
 namespace Weather.Infrastructure.OpenMeteo.OpenMeteoDTOs.Weather.Daily;
 
-public enum WeatherDailyField
+public enum WeatherDailyFields
 {
     TemperatureMean,
     ApparentTemperatureMean,

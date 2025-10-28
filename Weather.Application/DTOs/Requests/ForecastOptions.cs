@@ -1,4 +1,5 @@
 using Weather.Application.DTOs.ForecastSettings;
+using Weather.Application.DTOs.Settings;
 
 namespace Weather.Application.DTOs.Requests;
 
